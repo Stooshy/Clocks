@@ -1,22 +1,44 @@
 package application.gui.ledbutton;
 
+import application.gui.CounterMode;
 import application.gui.segment.TimeProvider;
 
 public class TimeCounter implements TimeProvider
 {
-	private final int seconds;
-	private final int minutes;
-	private final int hours;
+	private int seconds;
+	private int minutes;
+	private int hours;
 	private int actSeconds;
 	private int actMinutes;
 	private int actHours;
 
+	private CounterMode mode;
+
 
 	public TimeCounter(int h, int min, int sec)
 	{
+		mode = CounterMode.DOWN;
 		actSeconds = seconds = sec;
 		actMinutes = minutes = min;
 		actHours = hours = h;
+	}
+
+
+	public void setSeconds(int value)
+	{
+		seconds = value;
+	}
+
+
+	public void setMinutes(int value)
+	{
+		minutes = value;
+	}
+
+
+	public void setHours(int value)
+	{
+		hours = value;
 	}
 
 
@@ -38,12 +60,21 @@ public class TimeCounter implements TimeProvider
 	}
 
 
+	public boolean count()
+	{
+		if (mode == CounterMode.UP)
+			return increment();
+		else
+			return decrement();
+	}
+
+
 	/**
 	 * Decrements the counter by 1 second.
 	 * 
 	 * @return false if the counter was max before decrementing.
 	 */
-	public synchronized boolean decrement()
+	private synchronized boolean decrement()
 	{
 		if (actSeconds == 0 && actMinutes == 0 && hours == 0)
 			return false;
@@ -78,7 +109,7 @@ public class TimeCounter implements TimeProvider
 	 *         max 99:59:59
 	 *         </p>
 	 */
-	public synchronized boolean increment()
+	private synchronized boolean increment()
 	{
 		if (actMinutes == 99 && actSeconds == 59 && actHours == 59)
 			return false;
@@ -86,13 +117,21 @@ public class TimeCounter implements TimeProvider
 		actSeconds += 1;
 		if (actSeconds == 60)
 		{
+			actSeconds = 59;
 			if (actMinutes < 59)
 			{
 				actMinutes += 1;
 				actSeconds = 0;
 			}
-			else if (actHours < 99)
-				actHours += 1;
+			else
+			{
+				if (actHours < 99)
+				{
+					actHours += 1;
+					actMinutes = 0;
+					actSeconds = 0;
+				}
+			}
 		}
 		return true;
 	}
@@ -102,12 +141,25 @@ public class TimeCounter implements TimeProvider
 	{
 		actSeconds = seconds;
 		actMinutes = minutes;
+		actHours = hours;
 	}
 
 
 	public String getText()
 	{
 		return String.format("%02d:%02d", actMinutes, actSeconds);
+	}
+
+
+	public void setMode(CounterMode newMode)
+	{
+		mode = newMode;
+	}
+
+
+	public int setSeconds()
+	{
+		return seconds;
 	}
 
 }

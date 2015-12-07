@@ -4,9 +4,8 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Locale;
 
+import application.gui.CounterMode;
 import application.gui.ledbutton.LedButton;
 import application.gui.ledbutton.TimeCounter;
 import application.gui.segment.SevenSegmentsDisplay;
@@ -85,7 +84,7 @@ public class SegmentDemo extends Application
 
 		final Delta dragDelta = new Delta();
 
-		Scene scene = new Scene(borderPane, 200, 100);
+		Scene scene = new Scene(borderPane, 210, 100);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
@@ -165,7 +164,7 @@ public class SegmentDemo extends Application
 							if (counterLine.getStatus() == Status.STOPPED)
 							{
 								go.setSelected(false);
-								counter = new TimeCounter(0, 0, 0);
+								counter.reset();
 								display.setTime(0, 0, 0);
 								display.setTimeProvider(display);
 							}
@@ -191,7 +190,7 @@ public class SegmentDemo extends Application
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				if (!counter.decrement())
+				if (!counter.count())
 				{
 					try
 					{
@@ -266,6 +265,7 @@ public class SegmentDemo extends Application
 				}
 			});
 			add(showCounter, 0, 0);
+			GridPane.setValignment(showCounter, VPos.BASELINE);
 
 			go = new LedButton();
 			go.setText("Go");
@@ -276,7 +276,10 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						counter = new TimeCounter(display.getHours(), display.getMinutes(), display.getSeconds());
+						counter.setSeconds(display.getSeconds());
+						counter.setMinutes(display.getMinutes());
+						counter.setHours(display.getHours());
+						counter.reset();
 						display.setTimeProvider(counter);
 						SegmentDemo.this.counterLine.play();
 					}
@@ -310,16 +313,72 @@ public class SegmentDemo extends Application
 				}
 			});
 			add(go, 1, 0);
+			GridPane.setValignment(go, VPos.BASELINE);
+			LedButton counterMode = new LedButton();
+			counterMode.setText("<");
+			counterMode.selectedProperty().addListener(new ChangeListener<Boolean>()
+			{
+				@Override
+				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+				{
+					if (newValue)
+					{
+						counterMode.setText(">");
+						counter.setMode(CounterMode.UP);
+					}
+					else
+					{
+						counterMode.setText("<");
+						counter.setMode(CounterMode.DOWN);
+					}
+				}
+			});
+			counterMode.setOnMouseEntered(new EventHandler<MouseEvent>()
+			{
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					counterMode.setEffect(glow);
+				}
+			});
+			counterMode.setOnMouseExited(new EventHandler<MouseEvent>()
+			{
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					counterMode.setEffect(null);
+				}
+			});
+			add(counterMode, 2, 0);
+			GridPane.setValignment(counterMode, VPos.BASELINE);
 
-			String date = LocalDate.now()
-					.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.GERMAN));
-			Font font = Font.font("Tahoma", FontWeight.THIN, FontPosture.ITALIC, 11.0);
-			Text text = new Text(date);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE\nd.M. (w)");
+			String dateTxt = LocalDate.now().format(formatter);
+
+			Font font = Font.font("Tahoma", FontWeight.THIN, FontPosture.ITALIC, 12.0);
+			final Text text = new Text(dateTxt);
 			text.setFont(font);
-			text.setTextOrigin(VPos.TOP);
-			text.setTextAlignment(TextAlignment.LEFT);
-			text.setWrappingWidth(100);
-			add(text, 2, 0);
+			text.setTextAlignment(TextAlignment.CENTER);
+			text.setWrappingWidth(75);
+			add(text, 3, 0);
+
+			final LastDay lastdate = new LastDay();
+			lastdate.day = LocalDate.now().getDayOfMonth();
+			final Timeline dateLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent actionEvent)
+				{
+					if (lastdate.day == LocalDate.now().getDayOfMonth())
+						return;
+
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE\nd.M. (w)");
+					String dateTxt = LocalDate.now().format(formatter);
+					text.setText(dateTxt);
+				}
+			}), new KeyFrame(Duration.hours(1)));
+			dateLine.setCycleCount(Animation.INDEFINITE);
+			dateLine.play();
 
 			LedButton closeBtn = new LedButton();
 			closeBtn.setText("X");
@@ -347,7 +406,8 @@ public class SegmentDemo extends Application
 					closeBtn.setEffect(null);
 				}
 			});
-			add(closeBtn, 3, 0);
+			add(closeBtn, 5, 0);
+			GridPane.setValignment(closeBtn, VPos.BASELINE);
 
 			ColumnConstraints col = new ColumnConstraints();
 			col.setHalignment(HPos.CENTER);
@@ -358,21 +418,31 @@ public class SegmentDemo extends Application
 			getColumnConstraints().add(col);
 
 			col = new ColumnConstraints();
+			col.setHalignment(HPos.CENTER);
+			getColumnConstraints().add(col);
+
+			col = new ColumnConstraints();
 			col.setHalignment(HPos.LEFT);
 			col.setFillWidth(true);
-			col.setPrefWidth(90);
+			col.setPrefWidth(75);
 			col.setHgrow(Priority.ALWAYS);
 			getColumnConstraints().add(col);
 
 			col = new ColumnConstraints();
 			col.setHalignment(HPos.CENTER);
 			getColumnConstraints().add(col);
+
 		}
 	}
 
 	private class Delta
 	{
 		double x, y;
+	}
+
+	private class LastDay
+	{
+		int day;
 	}
 
 	private class LocalTimeProvider implements TimeProvider
