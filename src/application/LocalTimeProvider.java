@@ -1,8 +1,8 @@
-package application.gui;
+package application;
 
 import java.time.LocalTime;
 
-import application.gui.segment.TimeProvider;
+import application.gui.TimeProvider;
 
 public class LocalTimeProvider implements TimeProvider
 {

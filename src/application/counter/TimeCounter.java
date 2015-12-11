@@ -1,9 +1,10 @@
-package application.gui.ledbutton;
+package application.counter;
 
+import application.LocalTimeProvider;
 import application.gui.CounterMode;
-import application.gui.segment.TimeProvider;
+import application.gui.TimeProvider;
 
-public final class TimeCounter implements TimeProvider
+public class TimeCounter implements TimeProvider
 {
 	private int seconds;
 	private int minutes;
@@ -12,14 +13,8 @@ public final class TimeCounter implements TimeProvider
 	private static int actSeconds;
 	private static int actMinutes;
 	private static int actHours;
-	private static int delay = 200;
 	private CounterMode mode;
-
-
-	public TimeCounter(int h, int min, int sec)
-	{
-		this(h, min, sec, 0);
-	}
+	private static int lastSec = 0;
 
 
 	public TimeCounter(int h, int min, int sec, int milli)
@@ -96,12 +91,17 @@ public final class TimeCounter implements TimeProvider
 	 */
 	private boolean decrement()
 	{
-		if (actMilliSeconds == 0 && actSeconds == 0 && actMinutes == 0 && hours == 0)
-			return false;
-
-		if (actMilliSeconds == 0)
+		if (actSeconds == 0 && actMinutes == 0 && hours == 0)
 		{
-			if (actSeconds == 0)
+			actMilliSeconds = 0;
+			return false;
+		}
+
+		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
+		{
+			if (actSeconds > 0)
+				actSeconds--;
+			else
 			{
 				if (actMinutes > 0)
 				{
@@ -115,17 +115,10 @@ public final class TimeCounter implements TimeProvider
 					actSeconds = 59;
 				}
 			}
-			else
-			{
-				actMilliSeconds = 1000;
-				actSeconds--;
-			}
+			actMilliSeconds = 1000 - LocalTimeProvider.getInstance().getMilliseconds();
 		}
-		else
-			actMilliSeconds = actMilliSeconds - delay;
-
+		lastSec = LocalTimeProvider.getInstance().getSeconds();
 		return true;
-
 	}
 
 
@@ -142,10 +135,8 @@ public final class TimeCounter implements TimeProvider
 		if (actMinutes == 99 && actSeconds == 59 && actHours == 59)
 			return false;
 
-		actMilliSeconds = actMilliSeconds + delay;
-		if (actMilliSeconds == 1000)
+		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
 		{
-			actMilliSeconds = 0;
 			actSeconds++;
 			if (actSeconds == 60)
 			{
@@ -165,7 +156,9 @@ public final class TimeCounter implements TimeProvider
 					}
 				}
 			}
+			actMilliSeconds = LocalTimeProvider.getInstance().getMilliseconds();
 		}
+		lastSec = LocalTimeProvider.getInstance().getSeconds();
 		return true;
 	}
 

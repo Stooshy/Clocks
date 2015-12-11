@@ -1,4 +1,4 @@
-package application.gui.segment;
+package application.gui;
 
 public interface TimeProvider
 {

@@ -3,6 +3,7 @@ package application.gui.segment;
 import java.util.ArrayList;
 import java.util.List;
 
+import application.gui.TimeProvider;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;

@@ -1,5 +1,6 @@
 package application.gui.segment;
 
+import application.gui.TimeProvider;
 import javafx.scene.layout.Pane;
 
 public interface TimeConsumer

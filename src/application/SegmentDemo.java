@@ -4,14 +4,13 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import application.counter.TimeCounter;
 import application.gui.CounterMode;
-import application.gui.LocalTimeProvider;
 import application.gui.ScreensController;
+import application.gui.TimeProvider;
 import application.gui.ledbutton.LedButton;
-import application.gui.ledbutton.TimeCounter;
 import application.gui.segment.SevenSegmentsDisplay;
 import application.gui.segment.TimeConsumer;
-import application.gui.segment.TimeProvider;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
@@ -61,7 +60,7 @@ public class SegmentDemo extends Application
 	@Override
 	public void init()
 	{
-		counter = new TimeCounter(0, 0, 10);
+		counter = new TimeCounter(0, 0, 10, 0);
 		stopWatchDisplay = new SevenSegmentsDisplay();
 		stopWatchDisplay.setTimeProvider(counter);
 
@@ -96,7 +95,7 @@ public class SegmentDemo extends Application
 		addMouseListeners(stage, mainContainer);
 		addMouseListeners(stage, borderPane);
 
-		//********* timelines for time and counter********
+		// ********* timelines for time and counter********
 		final Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
@@ -104,7 +103,7 @@ public class SegmentDemo extends Application
 			{
 				watchDisplay.consumeTime();
 			}
-		}), new KeyFrame(Duration.millis(200)));
+		}), new KeyFrame(Duration.millis(100)));
 		watchLine.setCycleCount(Animation.INDEFINITE);
 		watchLine.play();
 
@@ -132,7 +131,7 @@ public class SegmentDemo extends Application
 					}
 				}
 			}
-		}), new KeyFrame(Duration.millis(200)));
+		}), new KeyFrame(Duration.millis(100)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 		stage.show();
 	}
@@ -219,7 +218,8 @@ public class SegmentDemo extends Application
 				}
 			});
 			add(showCounter, 0, 0);
-			GridPane.setValignment(showCounter, VPos.BASELINE);
+			GridPane.setValignment(showCounter, VPos.CENTER);
+			GridPane.setHalignment(showCounter, HPos.CENTER);
 
 			go = new LedButton();
 			go.setSkinText("Go");
@@ -252,7 +252,8 @@ public class SegmentDemo extends Application
 			});
 
 			add(go, 1, 0);
-			GridPane.setValignment(go, VPos.BASELINE);
+			GridPane.setValignment(go, VPos.CENTER);
+			GridPane.setHalignment(go, HPos.CENTER);
 
 			LedButton counterMode = new LedButton();
 			counterMode.setSkinText("<");
@@ -275,7 +276,8 @@ public class SegmentDemo extends Application
 			});
 
 			add(counterMode, 2, 0);
-			GridPane.setValignment(counterMode, VPos.BASELINE);
+			GridPane.setValignment(counterMode, VPos.CENTER);
+			GridPane.setHalignment(counterMode, HPos.CENTER);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE\nd.M. (w)");
 			String dateTxt = LocalDate.now().format(formatter);
@@ -287,7 +289,7 @@ public class SegmentDemo extends Application
 			text.setWrappingWidth(75);
 			add(text, 3, 0);
 
-			//************ timeline date field****************
+			// ************ timeline date field****************
 			final LastDay today = new LastDay();
 			today.day = LocalDate.now().getDayOfMonth();
 			final Timeline dateLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
@@ -317,7 +319,8 @@ public class SegmentDemo extends Application
 				}
 			});
 			add(closeBtn, 5, 0);
-			GridPane.setValignment(closeBtn, VPos.BASELINE);
+			GridPane.setValignment(closeBtn, VPos.CENTER);
+			GridPane.setHalignment(closeBtn, HPos.CENTER);
 
 			ColumnConstraints col = new ColumnConstraints();
 			col.setHalignment(HPos.CENTER);
