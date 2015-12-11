@@ -9,11 +9,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.SVGPath;
 
-public class SevenSegmentsDisplay implements TimeProvider
+public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 {
 	private final List<SevenSegmentsControl> segments = new ArrayList<SevenSegmentsControl>();
-	private GridPane sp;
-	private TimeProvider timeProvider;
+	private final GridPane sp;
+	protected TimeProvider timeProvider;
 
 
 	/**
@@ -21,13 +21,14 @@ public class SevenSegmentsDisplay implements TimeProvider
 	 */
 	public SevenSegmentsDisplay()
 	{
+		sp = new GridPane();
+		sp.setId("clockpane");
 		buildDisplayPane();
 	}
 
 
 	private void buildDisplayPane()
 	{
-		sp = new GridPane();
 		for (int colIdx = 1; colIdx <= 8; colIdx++)
 		{
 			if (colIdx == 3 || colIdx == 6)
@@ -37,7 +38,7 @@ public class SevenSegmentsDisplay implements TimeProvider
 			else
 			{
 				final SevenSegmentsControl seg = new SevenSegmentsControl();
-				segments.add(seg);
+				getSegments().add(seg);
 				seg.setOnMouseReleased(new EventHandler<MouseEvent>()
 				{
 					@Override
@@ -64,26 +65,26 @@ public class SevenSegmentsDisplay implements TimeProvider
 		int idx = 0;
 		for (SevenDigit value : values)
 		{
-			segments.get(idx++).set(value);
+			getSegments().get(idx++).set(value);
 		}
 	}
 
 
 	public int getSeconds()
 	{
-		return segments.get(4).getDigit().ordinal() * 10 + segments.get(5).getDigit().ordinal();
+		return getSegments().get(4).getDigit().ordinal() * 10 + getSegments().get(5).getDigit().ordinal();
 	}
 
 
 	public int getMinutes()
 	{
-		return segments.get(2).getDigit().ordinal() * 10 + segments.get(3).getDigit().ordinal();
+		return getSegments().get(2).getDigit().ordinal() * 10 + getSegments().get(3).getDigit().ordinal();
 	}
 
 
 	public int getHours()
 	{
-		return segments.get(0).getDigit().ordinal() * 10 + segments.get(1).getDigit().ordinal();
+		return getSegments().get(0).getDigit().ordinal() * 10 + getSegments().get(1).getDigit().ordinal();
 	}
 
 
@@ -92,8 +93,8 @@ public class SevenSegmentsDisplay implements TimeProvider
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		segments.get(4).set(SevenDigit.values()[b]);
-		segments.get(5).set(SevenDigit.values()[a]);
+		getSegments().get(4).set(SevenDigit.values()[b]);
+		getSegments().get(5).set(SevenDigit.values()[a]);
 	}
 
 
@@ -102,8 +103,8 @@ public class SevenSegmentsDisplay implements TimeProvider
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		segments.get(2).set(SevenDigit.values()[b]);
-		segments.get(3).set(SevenDigit.values()[a]);
+		getSegments().get(2).set(SevenDigit.values()[b]);
+		getSegments().get(3).set(SevenDigit.values()[a]);
 	}
 
 
@@ -112,8 +113,8 @@ public class SevenSegmentsDisplay implements TimeProvider
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		segments.get(0).set(SevenDigit.values()[b]);
-		segments.get(1).set(SevenDigit.values()[a]);
+		getSegments().get(0).set(SevenDigit.values()[b]);
+		getSegments().get(1).set(SevenDigit.values()[a]);
 	}
 
 
@@ -131,9 +132,10 @@ public class SevenSegmentsDisplay implements TimeProvider
 	}
 
 
-	public void setTimeProvider(final TimeProvider provider)
+	public void setTimeProvider(TimeProvider provider)
 	{
 		this.timeProvider = provider;
+		consumeTime();
 	}
 
 
@@ -144,4 +146,42 @@ public class SevenSegmentsDisplay implements TimeProvider
 		return marks;
 	}
 
+
+	protected List<SevenSegmentsControl> getSegments()
+	{
+		return segments;
+	}
+
+
+	@Override
+	public int getMilliseconds()
+	{
+		return 0;
+	}
+
+
+	/*
+	 * Unklar: Pane für ms ? Neues Control oder dieses erweitern lassen?
+	 */
+	protected void addToPane(SevenSegmentsControl node, int col)
+	{
+		getSegments().add(node);
+		node.setOnMouseReleased(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent event)
+			{
+				SevenSegmentsControl source = (SevenSegmentsControl) event.getSource();
+				source.set(source.getDigit().nextNumber());
+			}
+		});
+		sp.addColumn(getSegments().size() + 1, node);
+	}
+
+
+	@Override
+	public void setTime(int seconds, int minutes, int hours, int milli)
+	{
+		setTime(seconds, minutes, hours);
+	}
 }

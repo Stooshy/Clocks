@@ -24,4 +24,7 @@ public interface TimeProvider
 	 */
 	int getHours();
 
+
+	int getMilliseconds();
+
 }

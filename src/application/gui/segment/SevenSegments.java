@@ -31,8 +31,8 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 	private static final double PREFERRED_WIDTH = 65;
 	private static final double PREFERRED_HEIGHT = 110;
 	private final StackPane pane = new StackPane();
-	private final List<SVGPath> shadows = new ArrayList<SVGPath>();
-	private final List<SVGPath> digits = new ArrayList<SVGPath>();
+	protected final List<SVGPath> shadows = new ArrayList<SVGPath>();
+	protected final List<SVGPath> digits = new ArrayList<SVGPath>();
 	private static String SHAPE = "m 54.877123,1052.3432 0,-10.2949 -4.877123,0 c 1.625755,3.4314 3.252151,6.863 4.877123,10.2949 z m 0.217693,0.019 0,-10.2949 4.877122,0 c -1.625754,3.4317 -3.25215,6.8628 -4.877122,10.2949 z M 60,1013.0061 l -9.987503,0 0,28.6553 9.987503,0 z m -5.108634,-10.6257 0,10.2947 -4.877123,0 c 1.625755,-3.4315 3.25215,-6.8629 4.877123,-10.2947 z m 0.217693,-0.019 0,10.2949 4.877122,0 c -1.625754,-3.4316 -3.25215,-6.863 -4.877122,-10.2949 z";
 
 
@@ -167,7 +167,7 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 	}
 
 
-	private void resize()
+	protected void resize()
 	{
 		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
 				: getSkinnable().getHeight();
@@ -182,7 +182,7 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 
 		if (hight < PREFERRED_HEIGHT)
 		{
-			setScaleY( hight / (PREFERRED_HEIGHT));
+			setScaleY(hight / (PREFERRED_HEIGHT));
 		}
 		else
 		{
@@ -201,18 +201,18 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 	}
 
 
-	private void setScaleX(double scale)
+	protected void setScaleX(double scale)
 	{
-		digits.forEach(s -> s.setScaleX(scale*  1.8));
-		shadows.forEach(s -> s.setScaleX(scale*  1.8));
+		digits.forEach(s -> s.setScaleX(scale * 1.8));
+		shadows.forEach(s -> s.setScaleX(scale * 1.8));
 		getSkinnable().setScaleX(scale);
 	}
 
 
-	private void setScaleY(double scale)
+	protected void setScaleY(double scale)
 	{
-		digits.forEach(s -> s.setScaleY(scale *  1.8));
-		shadows.forEach(s -> s.setScaleY(scale  * 1.8));
+		digits.forEach(s -> s.setScaleY(scale * 1.8));
+		shadows.forEach(s -> s.setScaleY(scale * 1.8));
 		getSkinnable().setScaleY(scale);
 	}
 }

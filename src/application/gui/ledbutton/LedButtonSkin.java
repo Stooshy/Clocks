@@ -1,3 +1,4 @@
+//Origin http://harmoniccode.blogspot.de/2013_05_01_archive.html
 package application.gui.ledbutton;
 
 import application.gui.ledbutton.LedButton;
@@ -23,7 +24,6 @@ import javafx.scene.text.Text;
 
 public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton>
 {
-	// Origin http://harmoniccode.blogspot.de/2013_05_01_archive.html
 	private static final double MINIMUM_WIDTH = 25;
 	private static final double MINIMUM_HEIGHT = 25;
 	private static final double MAXIMUM_WIDTH = 1024;
@@ -203,7 +203,7 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		ledOn.setEffect(ledOnGlow);
 
 		font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 40.0 / 144.0 * PREFERRED_WIDTH);
-		text = new Text(getSkinnable().getText());
+		text = new Text(getSkinnable().getSkinText());
 		text.setFont(font);
 		text.setTextOrigin(VPos.TOP);
 		text.getStyleClass().add("text");
@@ -256,7 +256,7 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 				handleControlPropertyChanged("SELECTED");
 			}
 		});
-		getSkinnable().textProperty().addListener(new ChangeListener<String>()
+		getSkinnable().textSkinProperty().addListener(new ChangeListener<String>()
 		{
 
 			@Override
@@ -319,7 +319,7 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		}
 		else if ("TEXT".equals(PROPERTY))
 		{
-			text.setText(getSkinnable().getText());
+			text.setText(getSkinnable().getSkinText());
 		}
 		else if ("LED_COLOR".equals(PROPERTY))
 		{

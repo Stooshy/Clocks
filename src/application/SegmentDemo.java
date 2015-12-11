@@ -2,13 +2,15 @@ package application;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import application.gui.CounterMode;
+import application.gui.LocalTimeProvider;
+import application.gui.ScreensController;
 import application.gui.ledbutton.LedButton;
 import application.gui.ledbutton.TimeCounter;
 import application.gui.segment.SevenSegmentsDisplay;
+import application.gui.segment.TimeConsumer;
 import application.gui.segment.TimeProvider;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -22,20 +24,18 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
-import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.effect.Glow;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -47,19 +47,30 @@ import javafx.util.Duration;
 
 public class SegmentDemo extends Application
 {
-	private SevenSegmentsDisplay display;
+	private TimeConsumer stopWatchDisplay;
 	private TimeCounter counter;
 	private LedButton showCounter;
 	private Timeline counterLine;
 	private LedButton go;
+	private TimeConsumer watchDisplay;
+	public static final String WATCH_SCREEN = "watch";
+	public static final String COUNTER_SCREEN = "counter";
+	private ScreensController mainContainer;
 
 
 	@Override
 	public void init()
 	{
-		display = new SevenSegmentsDisplay();
-		display.setTimeProvider(new LocalTimeProvider());
 		counter = new TimeCounter(0, 0, 10);
+		stopWatchDisplay = new SevenSegmentsDisplay();
+		stopWatchDisplay.setTimeProvider(counter);
+
+		watchDisplay = new SevenSegmentsDisplay();
+		watchDisplay.setTimeProvider(LocalTimeProvider.getInstance());
+
+		mainContainer = new ScreensController();
+		mainContainer.addScreen(WATCH_SCREEN, watchDisplay.getPane());
+		mainContainer.addScreen(COUNTER_SCREEN, stopWatchDisplay.getPane());
 	}
 
 
@@ -68,129 +79,43 @@ public class SegmentDemo extends Application
 	{
 		stage.initStyle(StageStyle.TRANSPARENT);
 		stage.setAlwaysOnTop(true);
+		stage.getIcons().add(new Image("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/logo.png"));
+		stage.setTitle("7 Segments");
 
 		final BorderPane borderPane = new BorderPane();
 		borderPane.setId("ROOTNODE");
-
-		Rectangle rect = new Rectangle(1024, 768);
-		rect.setArcHeight(25.0);
-		rect.setArcWidth(25.0);
-		borderPane.setClip(rect);
-
 		borderPane.setTop(new Buttons());
-		Pane pane = display.getPane();
-		pane.setId("clockpane");
-		borderPane.setCenter(pane);
 
-		final Delta dragDelta = new Delta();
-
-		Scene scene = new Scene(borderPane, 210, 100);
+		mainContainer.setScreen(WATCH_SCREEN);
+		borderPane.setCenter(mainContainer);
+		Scene scene = new Scene(borderPane, 200, 100);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
-		pane.setOnMousePressed(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				// record a delta distance for the drag and drop operation.
-				dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-				dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-				scene.setCursor(Cursor.MOVE);
-			}
-		});
 
-		pane.setOnMouseDragged(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent event)
-			{
-				stage.setX(event.getScreenX() + dragDelta.x);
-				stage.setY(event.getScreenY() + dragDelta.y);
-			}
-		});
+		addMouseListeners(stage, mainContainer);
+		addMouseListeners(stage, borderPane);
 
-		pane.setOnMouseReleased(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				scene.setCursor(Cursor.DEFAULT);
-			}
-		});
-
-		borderPane.setOnMousePressed(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				// record a delta distance for the drag and drop operation.
-				dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-				dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-				scene.setCursor(Cursor.MOVE);
-			}
-		});
-
-		borderPane.setOnMouseDragged(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent event)
-			{
-				stage.setX(event.getScreenX() + dragDelta.x);
-				stage.setY(event.getScreenY() + dragDelta.y);
-			}
-		});
-
-		borderPane.setOnMouseReleased(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				scene.setCursor(Cursor.DEFAULT);
-			}
-		});
-
-		borderPane.setOnMouseClicked(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
-				{
-					if (mouseEvent.getClickCount() == 2)
-					{
-						if (showCounter.isSelected())
-						{
-							if (counterLine.getStatus() == Status.STOPPED)
-							{
-								go.setSelected(false);
-								counter.reset();
-								display.setTime(0, 0, 0);
-								display.setTimeProvider(display);
-							}
-						}
-					}
-				}
-			}
-		});
-
-		final Timeline displayLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		//********* timelines for time and counter********
+		final Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				display.consumeTime();
+				watchDisplay.consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(200)));
-		displayLine.setCycleCount(Animation.INDEFINITE);
-		displayLine.play();
+		watchLine.setCycleCount(Animation.INDEFINITE);
+		watchLine.play();
 
 		counterLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				if (!counter.count())
+				if (counter.count())
+					stopWatchDisplay.consumeTime();
+				else
 				{
 					try
 					{
@@ -207,9 +132,57 @@ public class SegmentDemo extends Application
 					}
 				}
 			}
-		}), new KeyFrame(Duration.millis(1000)));
+		}), new KeyFrame(Duration.millis(200)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 		stage.show();
+	}
+
+
+	private void addMouseListeners(Stage stage, Node node)
+	{
+		final Delta dragDelta = new Delta();
+		node.setOnMouseDragged(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent event)
+			{
+				stage.setX(event.getScreenX() + dragDelta.x);
+				stage.setY(event.getScreenY() + dragDelta.y);
+			}
+		});
+		node.setOnMousePressed(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent mouseEvent)
+			{
+				// record a delta distance for the drag and drop operation.
+				dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+				dragDelta.y = stage.getY() - mouseEvent.getScreenY();
+			}
+		});
+		node.setOnMouseClicked(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent mouseEvent)
+			{
+				if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
+				{
+					if (mouseEvent.getClickCount() == 2)
+					{
+						if (showCounter.isSelected())
+						{
+							if (counterLine.getStatus() == Status.STOPPED)
+							{
+								go.setSelected(false);
+								counter.set();
+								stopWatchDisplay.setTime(0, 0, 0, 0);
+								stopWatchDisplay.setTimeProvider((TimeProvider) stopWatchDisplay);
+							}
+						}
+					}
+				}
+			}
+		});
 	}
 
 
@@ -223,26 +196,9 @@ public class SegmentDemo extends Application
 
 		public Buttons()
 		{
-			final Glow glow = new Glow();
 			setId("TOPPANE");
 			showCounter = new LedButton("\nShow daytime or counter.");
-			showCounter.setText("M");
-			showCounter.setOnMouseEntered(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					showCounter.setEffect(glow);
-				}
-			});
-			showCounter.setOnMouseExited(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					showCounter.setEffect(null);
-				}
-			});
+			showCounter.setSkinText("M");
 			showCounter.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
 				@Override
@@ -252,15 +208,13 @@ public class SegmentDemo extends Application
 					{
 						if ((counterLine.getStatus() == Status.STOPPED))
 						{
-							display.setTime(counter.getSeconds(), counter.getMinutes(), counter.getHours());
-							display.setTimeProvider(display);
+							stopWatchDisplay.consumeTime();
 						}
-						else
-							display.setTimeProvider(counter);
+						mainContainer.setScreen(COUNTER_SCREEN);
 					}
 					else
 					{
-						display.setTimeProvider(new LocalTimeProvider());
+						mainContainer.setScreen(WATCH_SCREEN);
 					}
 				}
 			});
@@ -268,7 +222,7 @@ public class SegmentDemo extends Application
 			GridPane.setValignment(showCounter, VPos.BASELINE);
 
 			go = new LedButton();
-			go.setText("Go");
+			go.setSkinText("Go");
 			go.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
 				@Override
@@ -276,11 +230,11 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						counter.setSeconds(display.getSeconds());
-						counter.setMinutes(display.getMinutes());
-						counter.setHours(display.getHours());
-						counter.reset();
-						display.setTimeProvider(counter);
+						counter.setSeconds(((TimeProvider) stopWatchDisplay).getSeconds());
+						counter.setMinutes(((TimeProvider) stopWatchDisplay).getMinutes());
+						counter.setHours(((TimeProvider) stopWatchDisplay).getHours());
+						counter.set();
+						stopWatchDisplay.setTimeProvider((TimeProvider) counter);
 						SegmentDemo.this.counterLine.play();
 					}
 					else if (counterLine.getStatus() == Status.RUNNING)
@@ -296,26 +250,12 @@ public class SegmentDemo extends Application
 						SegmentDemo.this.counterLine.stop();
 				}
 			});
-			go.setOnMouseEntered(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					go.setEffect(glow);
-				}
-			});
-			go.setOnMouseExited(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					go.setEffect(null);
-				}
-			});
+
 			add(go, 1, 0);
 			GridPane.setValignment(go, VPos.BASELINE);
+
 			LedButton counterMode = new LedButton();
-			counterMode.setText("<");
+			counterMode.setSkinText("<");
 			counterMode.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
 				@Override
@@ -323,32 +263,17 @@ public class SegmentDemo extends Application
 				{
 					if (newValue)
 					{
-						counterMode.setText(">");
+						counterMode.setSkinText(">");
 						counter.setMode(CounterMode.UP);
 					}
 					else
 					{
-						counterMode.setText("<");
+						counterMode.setSkinText("<");
 						counter.setMode(CounterMode.DOWN);
 					}
 				}
 			});
-			counterMode.setOnMouseEntered(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					counterMode.setEffect(glow);
-				}
-			});
-			counterMode.setOnMouseExited(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					counterMode.setEffect(null);
-				}
-			});
+
 			add(counterMode, 2, 0);
 			GridPane.setValignment(counterMode, VPos.BASELINE);
 
@@ -362,48 +287,33 @@ public class SegmentDemo extends Application
 			text.setWrappingWidth(75);
 			add(text, 3, 0);
 
-			final LastDay lastdate = new LastDay();
-			lastdate.day = LocalDate.now().getDayOfMonth();
+			//************ timeline date field****************
+			final LastDay today = new LastDay();
+			today.day = LocalDate.now().getDayOfMonth();
 			final Timeline dateLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 			{
 				@Override
 				public void handle(ActionEvent actionEvent)
 				{
-					if (lastdate.day == LocalDate.now().getDayOfMonth())
+					if (today.day == LocalDate.now().getDayOfMonth())
 						return;
 
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE\nd.M. (w)");
-					String dateTxt = LocalDate.now().format(formatter);
-					text.setText(dateTxt);
+					text.setText(LocalDate.now().format(formatter));
+					today.day = LocalDate.now().getDayOfMonth();
 				}
 			}), new KeyFrame(Duration.hours(1)));
 			dateLine.setCycleCount(Animation.INDEFINITE);
 			dateLine.play();
 
 			LedButton closeBtn = new LedButton();
-			closeBtn.setText("X");
+			closeBtn.setSkinText("X");
 			closeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
 				{
 					Platform.exit();
-				}
-			});
-			closeBtn.setOnMouseEntered(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					closeBtn.setEffect(glow);
-				}
-			});
-			closeBtn.setOnMouseExited(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					closeBtn.setEffect(null);
 				}
 			});
 			add(closeBtn, 5, 0);
@@ -445,27 +355,4 @@ public class SegmentDemo extends Application
 		int day;
 	}
 
-	private class LocalTimeProvider implements TimeProvider
-	{
-
-		@Override
-		public int getSeconds()
-		{
-			return LocalTime.now().getSecond();
-		}
-
-
-		@Override
-		public int getMinutes()
-		{
-			return LocalTime.now().getMinute();
-		}
-
-
-		@Override
-		public int getHours()
-		{
-			return LocalTime.now().getHour();
-		}
-	}
 }

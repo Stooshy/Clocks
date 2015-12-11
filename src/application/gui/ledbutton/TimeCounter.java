@@ -3,24 +3,38 @@ package application.gui.ledbutton;
 import application.gui.CounterMode;
 import application.gui.segment.TimeProvider;
 
-public class TimeCounter implements TimeProvider
+public final class TimeCounter implements TimeProvider
 {
 	private int seconds;
 	private int minutes;
 	private int hours;
-	private int actSeconds;
-	private int actMinutes;
-	private int actHours;
-
+	private static int actMilliSeconds;
+	private static int actSeconds;
+	private static int actMinutes;
+	private static int actHours;
+	private static int delay = 200;
 	private CounterMode mode;
 
 
 	public TimeCounter(int h, int min, int sec)
 	{
+		this(h, min, sec, 0);
+	}
+
+
+	public TimeCounter(int h, int min, int sec, int milli)
+	{
 		mode = CounterMode.DOWN;
+		actMilliSeconds = milli;
 		actSeconds = seconds = sec;
 		actMinutes = minutes = min;
 		actHours = hours = h;
+	}
+
+
+	public void setSMilliSeconds(int value)
+	{
+		actMilliSeconds = value;
 	}
 
 
@@ -60,6 +74,12 @@ public class TimeCounter implements TimeProvider
 	}
 
 
+	public int getMilliSeconds()
+	{
+		return (int) actMilliSeconds;
+	}
+
+
 	public boolean count()
 	{
 		if (mode == CounterMode.UP)
@@ -74,27 +94,35 @@ public class TimeCounter implements TimeProvider
 	 * 
 	 * @return false if the counter was max before decrementing.
 	 */
-	private synchronized boolean decrement()
+	private boolean decrement()
 	{
-		if (actSeconds == 0 && actMinutes == 0 && hours == 0)
+		if (actMilliSeconds == 0 && actSeconds == 0 && actMinutes == 0 && hours == 0)
 			return false;
 
-		if (actSeconds == 0)
+		if (actMilliSeconds == 0)
 		{
-			if (actMinutes > 0)
+			if (actSeconds == 0)
 			{
-				actMinutes -= 1;
-				actSeconds = 59;
+				if (actMinutes > 0)
+				{
+					actMinutes--;
+					actSeconds = 59;
+				}
+				else if (actHours > 0)
+				{
+					actHours--;
+					actMinutes = 59;
+					actSeconds = 59;
+				}
 			}
-			else if (actHours > 0)
+			else
 			{
-				actHours -= 1;
-				actMinutes = 59;
-				actSeconds = 59;
+				actMilliSeconds = 1000;
+				actSeconds--;
 			}
 		}
 		else
-			actSeconds -= 1;
+			actMilliSeconds = actMilliSeconds - delay;
 
 		return true;
 
@@ -109,27 +137,32 @@ public class TimeCounter implements TimeProvider
 	 *         max 99:59:59
 	 *         </p>
 	 */
-	private synchronized boolean increment()
+	private boolean increment()
 	{
 		if (actMinutes == 99 && actSeconds == 59 && actHours == 59)
 			return false;
 
-		actSeconds += 1;
-		if (actSeconds == 60)
+		actMilliSeconds = actMilliSeconds + delay;
+		if (actMilliSeconds == 1000)
 		{
-			actSeconds = 59;
-			if (actMinutes < 59)
+			actMilliSeconds = 0;
+			actSeconds++;
+			if (actSeconds == 60)
 			{
-				actMinutes += 1;
-				actSeconds = 0;
-			}
-			else
-			{
-				if (actHours < 99)
+				actSeconds = 59;
+				if (actMinutes < 59)
 				{
-					actHours += 1;
-					actMinutes = 0;
+					actMinutes++;
 					actSeconds = 0;
+				}
+				else
+				{
+					if (actHours < 99)
+					{
+						actHours++;
+						actMinutes = 0;
+						actSeconds = 0;
+					}
 				}
 			}
 		}
@@ -137,17 +170,12 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	public void reset()
+	public void set()
 	{
 		actSeconds = seconds;
 		actMinutes = minutes;
 		actHours = hours;
-	}
-
-
-	public String getText()
-	{
-		return String.format("%02d:%02d", actMinutes, actSeconds);
+		actMilliSeconds = 0;
 	}
 
 
@@ -157,9 +185,10 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	public int setSeconds()
+	@Override
+	public int getMilliseconds()
 	{
-		return seconds;
+		return actMilliSeconds;
 	}
 
 }

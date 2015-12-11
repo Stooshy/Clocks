@@ -12,8 +12,12 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
+import javafx.fxml.FXML;
 import javafx.scene.control.Control;
 import javafx.scene.control.Tooltip;
+import javafx.scene.effect.Glow;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -22,6 +26,8 @@ public class LedButton extends Control
 	private ObjectProperty<Color> ledColor;
 	private BooleanProperty selected;
 	private StringProperty text;
+	@FXML
+	private AnchorPane myTestButton;
 
 
 	public LedButton(int min, int sec)
@@ -36,6 +42,36 @@ public class LedButton extends Control
 		ledColor = new SimpleObjectProperty<>(Color.RED);
 		text = new SimpleStringProperty(this, "text", "");
 		selected = new SimpleBooleanProperty(this, "selected", false);
+		final Glow glow = new Glow();
+
+		setOnMouseEntered(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent mouseEvent)
+			{
+				setEffect(glow);
+				setScaleX(1.3);
+				setScaleY(1.3);
+			}
+		});
+		setOnMouseExited(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent mouseEvent)
+			{
+				setEffect(null);
+				setScaleX(1);
+				setScaleY(1);
+				;
+			}
+		});
+	}
+
+
+	@Override
+	public String getUserAgentStylesheet()
+	{
+		return getClass().getResource("/application/7segmentdemo.css").toExternalForm();
 	}
 
 
@@ -50,13 +86,13 @@ public class LedButton extends Control
 	}
 
 
-	public String getText()
+	public String getSkinText()
 	{
 		return text.get();
 	}
 
 
-	public void setText(String value)
+	public void setSkinText(String value)
 	{
 		text.set(value);
 	}
@@ -86,7 +122,7 @@ public class LedButton extends Control
 	}
 
 
-	public final StringProperty textProperty()
+	public final StringProperty textSkinProperty()
 	{
 		return text;
 	}
