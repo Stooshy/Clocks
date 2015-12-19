@@ -10,6 +10,7 @@ import application.gui.ScreensController;
 import application.gui.TimeProvider;
 import application.gui.ledbutton.LedButton;
 import application.gui.segment.SevenSegmentsDisplay;
+import application.gui.segment.SevenSegmentsDisplayStopWatch;
 import application.gui.segment.TimeConsumer;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -61,15 +62,15 @@ public class SegmentDemo extends Application
 	public void init()
 	{
 		counter = new TimeCounter(0, 0, 10, 0);
-		stopWatchDisplay = new SevenSegmentsDisplay();
+		stopWatchDisplay = new SevenSegmentsDisplayStopWatch();
 		stopWatchDisplay.setTimeProvider(counter);
 
 		watchDisplay = new SevenSegmentsDisplay();
 		watchDisplay.setTimeProvider(LocalTimeProvider.getInstance());
 
 		mainContainer = new ScreensController();
-		mainContainer.addScreen(WATCH_SCREEN, watchDisplay.getPane());
-		mainContainer.addScreen(COUNTER_SCREEN, stopWatchDisplay.getPane());
+		mainContainer.addScreen(WATCH_SCREEN, ((SevenSegmentsDisplay) watchDisplay).getPane());
+		mainContainer.addScreen(COUNTER_SCREEN, ((SevenSegmentsDisplay) stopWatchDisplay).getPane());
 	}
 
 
@@ -84,14 +85,13 @@ public class SegmentDemo extends Application
 		final BorderPane borderPane = new BorderPane();
 		borderPane.setId("ROOTNODE");
 		borderPane.setTop(new Buttons());
-
-		mainContainer.setScreen(WATCH_SCREEN);
+		mainContainer.setScreen(COUNTER_SCREEN);
 		borderPane.setCenter(mainContainer);
-		Scene scene = new Scene(borderPane, 200, 100);
+		Scene scene = new Scene(borderPane, 210, 120);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
-
+		mainContainer.setScreen(WATCH_SCREEN);
 		addMouseListeners(stage, mainContainer);
 		addMouseListeners(stage, borderPane);
 
@@ -112,14 +112,11 @@ public class SegmentDemo extends Application
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				if (counter.count())
-					stopWatchDisplay.consumeTime();
-				else
+				if (!counter.count())
 				{
 					try
 					{
-						SegmentDemo.this.counterLine.stop();
-
+						go.setSelected(false);
 						Media media = new Media(
 								"file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/bell.mp3");
 						MediaPlayer player = new MediaPlayer(media);
@@ -130,8 +127,9 @@ public class SegmentDemo extends Application
 						e.printStackTrace();
 					}
 				}
+				stopWatchDisplay.consumeTime();
 			}
-		}), new KeyFrame(Duration.millis(100)));
+		}), new KeyFrame(Duration.millis(110)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 		stage.show();
 	}
@@ -172,9 +170,8 @@ public class SegmentDemo extends Application
 						{
 							if (counterLine.getStatus() == Status.STOPPED)
 							{
-								go.setSelected(false);
-								counter.set();
-								stopWatchDisplay.setTime(0, 0, 0, 0);
+								counter.reset();
+								stopWatchDisplay.consumeTime();
 								stopWatchDisplay.setTimeProvider((TimeProvider) stopWatchDisplay);
 							}
 						}
@@ -230,11 +227,10 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						counter.setSeconds(((TimeProvider) stopWatchDisplay).getSeconds());
-						counter.setMinutes(((TimeProvider) stopWatchDisplay).getMinutes());
-						counter.setHours(((TimeProvider) stopWatchDisplay).getHours());
-						counter.set();
-						stopWatchDisplay.setTimeProvider((TimeProvider) counter);
+						counter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
+								((TimeProvider) stopWatchDisplay).getSeconds(),
+								((TimeProvider) stopWatchDisplay).getMilliSeconds());
+						stopWatchDisplay.setTimeProvider(counter);
 						SegmentDemo.this.counterLine.play();
 					}
 					else if (counterLine.getStatus() == Status.RUNNING)

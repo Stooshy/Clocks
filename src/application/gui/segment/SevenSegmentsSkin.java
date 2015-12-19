@@ -9,8 +9,7 @@ import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.SVGPath;
+import javafx.scene.layout.Pane;
 
 //@formatter:off
 /**
@@ -22,23 +21,22 @@ import javafx.scene.shape.SVGPath;
  * 				d
  */
 //@formatter:on
-public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Skin<SevenSegmentsControl>
+public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements Skin<SevenSegmentsControl>
 {
-	private static final double MINIMUM_WIDTH = 10;
-	private static final double MINIMUM_HEIGHT = 10;
-	private static final double MAXIMUM_WIDTH = 165;
-	private static final double MAXIMUM_HEIGHT = 210;
-	private static final double PREFERRED_WIDTH = 65;
-	private static final double PREFERRED_HEIGHT = 110;
-	private final StackPane pane = new StackPane();
-	protected final List<SVGPath> shadows = new ArrayList<SVGPath>();
-	protected final List<SVGPath> digits = new ArrayList<SVGPath>();
-	private static String SHAPE = "m 54.877123,1052.3432 0,-10.2949 -4.877123,0 c 1.625755,3.4314 3.252151,6.863 4.877123,10.2949 z m 0.217693,0.019 0,-10.2949 4.877122,0 c -1.625754,3.4317 -3.25215,6.8628 -4.877122,10.2949 z M 60,1013.0061 l -9.987503,0 0,28.6553 9.987503,0 z m -5.108634,-10.6257 0,10.2947 -4.877123,0 c 1.625755,-3.4315 3.25215,-6.8629 4.877123,-10.2947 z m 0.217693,-0.019 0,10.2949 4.877122,0 c -1.625754,-3.4316 -3.25215,-6.863 -4.877122,-10.2949 z";
+	public static final double MINIMUM_WIDTH = 10;
+	public static final double MINIMUM_HEIGHT = 10;
+	public static final double MAXIMUM_WIDTH = Segment.rotSegmentWidth + Segment.segmentWidth;
+	public static final double MAXIMUM_HEIGHT = Segment.segmentHeigths * 2 + Segment.rotSegmentHeights;
+	public static final double PREFERRED_WIDTH = Segment.rotSegmentWidth + Segment.segmentWidth;
+	public static final double PREFERRED_HEIGHT = Segment.segmentHeigths * 2 + Segment.rotSegmentHeights;
+	private final Pane pane = new Pane();
+	protected final List<Segment> digits = new ArrayList<Segment>();
 
 
-	public SevenSegments(final SevenSegmentsControl CONTROL)
+	public SevenSegmentsSkin(final SevenSegmentsControl CONTROL)
 	{
 		super(CONTROL);
+		pane.setId("segment");
 		init();
 		buildPane();
 		addListeners();
@@ -76,48 +74,54 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 	}
 
 
-	private void addNewSegment(int x, int y, double rotate)
+	private void addNewSegment(double x, double y, boolean rotate)
 	{
+		Segment svg = null;
 		addShadowSegment(x, y, rotate);
 
-		SVGPath svg = new SVGPath();
-		svg.getStyleClass().setAll("on");
-		svg.setContent(SHAPE);
-		svg.setTranslateY(y);
-		svg.setTranslateX(x);
-		svg.setRotate(rotate);
-
+		if (rotate)
+		{
+			svg = new Segment(x, y, "on-rot");
+			svg.setPrefSize(Segment.defRotSegmentWidth, Segment.defRotSegmentHeights);
+		}
+		else
+		{
+			svg = new Segment(x, y, "on");
+			svg.setPrefSize(Segment.defSegmentWidth, Segment.defSegmentHeigths);
+		}
 		digits.add(svg);
 		pane.getChildren().add(svg);
 	}
 
 
-	private void addShadowSegment(int x, int y, double rotate)
+	private void addShadowSegment(double x, double y, boolean rotate)
 	{
-		SVGPath svg = new SVGPath();
-		svg.getStyleClass().setAll("off");
-		svg.setContent(SHAPE);
-		svg.setTranslateY(y);
-		svg.setTranslateX(x);
-		svg.setRotate(rotate);
-
-		shadows.add(svg);
+		Segment svg = null;
+		if (rotate)
+		{
+			svg = new Segment(x, y, "off-rot");
+			svg.setPrefSize(Segment.defRotSegmentWidth, Segment.defRotSegmentHeights);
+		}
+		else
+		{
+			svg = new Segment(x, y, "off");
+			svg.setPrefSize(Segment.defSegmentWidth, Segment.defSegmentHeigths);
+		}
 		pane.getChildren().add(svg);
 	}
 
 
 	private void buildPane()
 	{
-		int x = 23;
-		int y = 24;
-		addNewSegment(0, -2 * y, 90);
-		addNewSegment(x, -y, 0);
-		addNewSegment(x, y, 0);
-		addNewSegment(0, 2 * y, 90);
-		addNewSegment(-x, y, 0);
-		addNewSegment(-x, -y, 0);
-		addNewSegment(0, 0, 90);
-
+		addNewSegment(Segment.rotSegmentHeights / 2, 0, true); // a
+		addNewSegment(PREFERRED_WIDTH - Segment.segmentWidth, (Segment.rotSegmentHeights / 2), false); // b
+		addNewSegment(PREFERRED_WIDTH - Segment.segmentWidth, PREFERRED_HEIGHT / 2, false); // c
+		addNewSegment(Segment.segmentWidth / 2, PREFERRED_HEIGHT - Segment.defRotSegmentHeights, true); // d
+		addNewSegment(0, PREFERRED_HEIGHT / 2, false); // f
+		addNewSegment(0, Segment.rotSegmentHeights / 2, false); // e
+		addNewSegment(Segment.segmentWidth / 2,
+				PREFERRED_HEIGHT - Segment.defSegmentHeigths - Segment.defRotSegmentHeights, true); // g
+		pane.getStyleClass().setAll("pane");
 		getChildren().setAll(pane);
 		resize();
 	}
@@ -177,42 +181,13 @@ public class SevenSegments extends SkinBase<SevenSegmentsControl> implements Ski
 			return;
 		}
 
-		double width = getSkinnable().getWidth();
-		double hight = getSkinnable().getHeight();
-
-		if (hight < PREFERRED_HEIGHT)
-		{
-			setScaleY(hight / (PREFERRED_HEIGHT));
-		}
-		else
-		{
-			setScaleY(1);
-		}
-
-		if (width < PREFERRED_WIDTH)
-		{
-			setScaleX(width / PREFERRED_WIDTH);
-
-		}
-		else
-		{
-			setScaleX(1);
-		}
+		double scaleX = getSkinnable().getWidth() / PREFERRED_WIDTH;
+		double scaleY = getSkinnable().getHeight() / PREFERRED_HEIGHT;
+		getSkinnable().setScaleY(scaleY);
+		getSkinnable().setScaleX(scaleX);
+		pane.setScaleY(scaleY);
+		pane.setScaleX(scaleX);
+	
 	}
 
-
-	protected void setScaleX(double scale)
-	{
-		digits.forEach(s -> s.setScaleX(scale * 1.8));
-		shadows.forEach(s -> s.setScaleX(scale * 1.8));
-		getSkinnable().setScaleX(scale);
-	}
-
-
-	protected void setScaleY(double scale)
-	{
-		digits.forEach(s -> s.setScaleY(scale * 1.8));
-		shadows.forEach(s -> s.setScaleY(scale * 1.8));
-		getSkinnable().setScaleY(scale);
-	}
 }

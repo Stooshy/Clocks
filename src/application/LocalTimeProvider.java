@@ -45,7 +45,7 @@ public class LocalTimeProvider implements TimeProvider
 
 
 	@Override
-	public int getMilliseconds()
+	public int getMilliSeconds()
 	{
 		return LocalTime.now().getNano() / 1000000;
 	}

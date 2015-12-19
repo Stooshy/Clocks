@@ -26,7 +26,7 @@ public enum SevenDigit
 {
 	ZERO(63), ONE(6), TWO(91), THREE(79), FOUR(102), FIVE(109), SIX(125), SEVEN(39), EIGHT(127), NINE(111), A(119), B(
 			124), C(57), D(94), E(121), F(113);
-	
+
 	private int code;
 
 
@@ -55,10 +55,19 @@ public enum SevenDigit
 	/**
 	 * 0-9
 	 */
-	public SevenDigit nextNumber()
+	public SevenDigit nextNumber(boolean up)
 	{
-		if (values().length > (ordinal() + 1) && (ordinal() + 1) < 10)
-			return values()[(ordinal() + 1) % values().length];
+		if (up)
+		{
+			if (values().length > (ordinal() + 1) && (ordinal() + 1) < 10)
+				return values()[(ordinal() + 1) % values().length];
+		}
+		else
+		{
+			if (values().length > (ordinal() - 1) && (ordinal() - 1) >= 0)
+				return values()[(ordinal() - 1) % values().length];
+		}
+
 		return SevenDigit.ZERO;
 
 	}

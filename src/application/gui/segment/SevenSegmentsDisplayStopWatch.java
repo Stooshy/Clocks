@@ -5,53 +5,74 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 
 	public SevenSegmentsDisplayStopWatch()
 	{
-		addSegements();
+		super();
 	}
 
 
 	@Override
-	public int getMilliseconds()
+	public int getSeconds()
 	{
-		return getSegments().get(getSegments().size() - 3).getDigit().ordinal() * 100
-				+ getSegments().get(getSegments().size() - 2).getDigit().ordinal() * 10
-				+ getSegments().get(getSegments().size() - 1).getDigit().ordinal();
+		return getSegment(2).getValue() * 10 + getSegment(3).getValue();
 	}
 
 
-	public void setMilliseconds(int value)
+	@Override
+	public int getMinutes()
+	{
+		return getSegment(0).getValue() * 10 + getSegment(1).getValue();
+	}
+
+
+	@Override
+	public int getHours()
+	{
+		return 0;
+	}
+
+
+	private void setSeconds(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
+
+		getSegment(2).set(SevenDigit.values()[b]);
+		getSegment(3).set(SevenDigit.values()[a]);
+	}
+
+
+	private void setMinutes(int value)
+	{
+		int a = value % 10;
+		int b = (value / 10) % 10;
+
+		getSegment(0).set(SevenDigit.values()[b]);
+		getSegment(1).set(SevenDigit.values()[a]);
+	}
+
+
+	@Override
+	public int getMilliSeconds()
+	{
+		return getSegment(4).getValue() * 100 + getSegment(5).getValue() * 10;
+	}
+
+
+	private void setMilliseconds(int value)
+	{
+		int b = (value / 10) % 10;
 		int c = (value / 100) % 10;
 
-		getSegments().get(getSegments().size() - 1).set(SevenDigit.values()[a]);
-		getSegments().get(getSegments().size() - 2).set(SevenDigit.values()[b]);
-		getSegments().get(getSegments().size() - 3).set(SevenDigit.values()[c]);
-	}
-
-
-	private void addSegements()
-	{
-//		for (int colIdx = 1; colIdx <= 3; colIdx++)
-//		{
-//			final SevenSegmentsSmall seg = new SevenSegmentsSmall();
-//			super.addToPane(seg, colIdx);
-//		}
-	}
-
-
-	public void setTime(int seconds, int minutes, int hours, int milli)
-	{
-		setMilliseconds(milli);
-		setTime(seconds, minutes, hours);
+		getSegment(5).set(SevenDigit.values()[b]);
+		getSegment(4).set(SevenDigit.values()[c]);
 	}
 
 
 	@Override
 	public void consumeTime()
 	{
-		setMilliseconds(timeProvider.getMilliseconds());
-		setTime(timeProvider.getSeconds(), timeProvider.getMinutes(), timeProvider.getHours());
+		setMilliseconds(timeProvider.getMilliSeconds());
+		setSeconds(timeProvider.getSeconds());
+		setMinutes(timeProvider.getMinutes());
 	}
 
 }

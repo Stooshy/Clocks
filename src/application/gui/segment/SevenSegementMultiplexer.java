@@ -33,24 +33,18 @@ public class SevenSegementMultiplexer
 	}
 
 
-	public SimpleObjectProperty<BitSet> getBitsProperty()
-	{
-		return getBits();
-	}
-
-
 	public void set(SevenDigit value)
 	{
-		getBits().set(convert(value.getCode()));
+		getBitsProperty().set(convert(value.getCode()));
 	}
 
 
 	private int getNumber()
 	{
 		int value = 0;
-		for (int i = 0; i < getBits().get().length(); ++i)
+		for (int i = 0; i < getBitsProperty().get().length(); ++i)
 		{
-			value += getBits().get().get(i) ? (1L << i) : 0L;
+			value += getBitsProperty().get().get(i) ? (1L << i) : 0L;
 		}
 		return value;
 	}
@@ -62,7 +56,7 @@ public class SevenSegementMultiplexer
 	}
 
 
-	public SimpleObjectProperty<BitSet> getBits()
+	public SimpleObjectProperty<BitSet> getBitsProperty()
 	{
 		return bits;
 	}

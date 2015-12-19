@@ -8,11 +8,10 @@ public class TimeCounter implements TimeProvider
 {
 	private int seconds;
 	private int minutes;
-	private int hours;
+	private int milliSeconds;
 	private static int actMilliSeconds;
 	private static int actSeconds;
 	private static int actMinutes;
-	private static int actHours;
 	private CounterMode mode;
 	private static int lastSec = 0;
 
@@ -23,58 +22,43 @@ public class TimeCounter implements TimeProvider
 		actMilliSeconds = milli;
 		actSeconds = seconds = sec;
 		actMinutes = minutes = min;
-		actHours = hours = h;
 	}
 
 
-	public void setSMilliSeconds(int value)
-	{
-		actMilliSeconds = value;
-	}
-
-
-	public void setSeconds(int value)
-	{
-		seconds = value;
-	}
-
-
-	public void setMinutes(int value)
-	{
-		minutes = value;
-	}
-
-
-	public void setHours(int value)
-	{
-		hours = value;
-	}
-
-
+	@Override
 	public int getHours()
 	{
-		return actHours;
+		return 0;
 	}
 
 
+	@Override
 	public int getMinutes()
 	{
 		return actMinutes;
 	}
 
 
+	@Override
 	public int getSeconds()
 	{
 		return actSeconds;
 	}
 
 
+	@Override
 	public int getMilliSeconds()
 	{
-		return (int) actMilliSeconds;
+		return actMilliSeconds;
 	}
 
 
+	/**
+	 * Decrements or increments the counter by 1 second if the last call to
+	 * count() was > 1s ago.
+	 * 
+	 * @return false if the counter would reached max/min value.
+	 */
 	public boolean count()
 	{
 		if (mode == CounterMode.UP)
@@ -84,14 +68,9 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	/**
-	 * Decrements the counter by 1 second.
-	 * 
-	 * @return false if the counter was max before decrementing.
-	 */
 	private boolean decrement()
 	{
-		if (actSeconds == 0 && actMinutes == 0 && hours == 0)
+		if (actSeconds == 0 && actMinutes == 0)
 		{
 			actMilliSeconds = 0;
 			return false;
@@ -100,7 +79,9 @@ public class TimeCounter implements TimeProvider
 		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
 		{
 			if (actSeconds > 0)
+			{
 				actSeconds--;
+			}
 			else
 			{
 				if (actMinutes > 0)
@@ -108,15 +89,9 @@ public class TimeCounter implements TimeProvider
 					actMinutes--;
 					actSeconds = 59;
 				}
-				else if (actHours > 0)
-				{
-					actHours--;
-					actMinutes = 59;
-					actSeconds = 59;
-				}
 			}
-			actMilliSeconds = 1000 - LocalTimeProvider.getInstance().getMilliseconds();
 		}
+		actMilliSeconds = 1000 - LocalTimeProvider.getInstance().getMilliSeconds();
 		lastSec = LocalTimeProvider.getInstance().getSeconds();
 		return true;
 	}
@@ -132,7 +107,7 @@ public class TimeCounter implements TimeProvider
 	 */
 	private boolean increment()
 	{
-		if (actMinutes == 99 && actSeconds == 59 && actHours == 59)
+		if (actMinutes == 99 && actSeconds == 59)
 			return false;
 
 		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
@@ -146,42 +121,33 @@ public class TimeCounter implements TimeProvider
 					actMinutes++;
 					actSeconds = 0;
 				}
-				else
-				{
-					if (actHours < 99)
-					{
-						actHours++;
-						actMinutes = 0;
-						actSeconds = 0;
-					}
-				}
 			}
-			actMilliSeconds = LocalTimeProvider.getInstance().getMilliseconds();
 		}
+		actMilliSeconds = LocalTimeProvider.getInstance().getMilliSeconds();
 		lastSec = LocalTimeProvider.getInstance().getSeconds();
 		return true;
 	}
 
 
-	public void set()
+	public void set(int minutes, int seconds, int milliSeconds)
 	{
-		actSeconds = seconds;
-		actMinutes = minutes;
-		actHours = hours;
-		actMilliSeconds = 0;
+		actSeconds = this.seconds = seconds;
+		actMinutes = this.minutes = minutes;
+		actMilliSeconds = this.milliSeconds = milliSeconds;
+	}
+
+
+	public void reset()
+	{
+		actSeconds = this.seconds;
+		actMinutes = this.minutes;
+		actMilliSeconds = this.milliSeconds;
 	}
 
 
 	public void setMode(CounterMode newMode)
 	{
 		mode = newMode;
-	}
-
-
-	@Override
-	public int getMilliseconds()
-	{
-		return actMilliSeconds;
 	}
 
 }

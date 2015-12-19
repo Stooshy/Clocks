@@ -24,7 +24,10 @@ public interface TimeProvider
 	 */
 	int getHours();
 
-
-	int getMilliseconds();
+	/**
+	 * 
+	 * @return value between 0 - 1000 representing millisconds
+	 */
+	int getMilliSeconds();
 
 }

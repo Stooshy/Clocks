@@ -28,8 +28,8 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 	private static final double MINIMUM_HEIGHT = 25;
 	private static final double MAXIMUM_WIDTH = 1024;
 	private static final double MAXIMUM_HEIGHT = 1024;
-	private static final double PREFERRED_WIDTH = 40;
-	private static final double PREFERRED_HEIGHT = 40;
+	private static final double PREFERRED_WIDTH = 45;
+	private static final double PREFERRED_HEIGHT = 45;
 	private double size;
 	private double width;
 	private double height;
