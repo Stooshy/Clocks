@@ -12,12 +12,10 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
-import javafx.fxml.FXML;
 import javafx.scene.control.Control;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -26,8 +24,6 @@ public class LedButton extends Control
 	private ObjectProperty<Color> ledColor;
 	private BooleanProperty selected;
 	private StringProperty text;
-	@FXML
-	private AnchorPane myTestButton;
 
 
 	public LedButton(int min, int sec)
@@ -62,9 +58,9 @@ public class LedButton extends Control
 				setEffect(null);
 				setScaleX(1);
 				setScaleY(1);
-				;
 			}
 		});
+		
 	}
 
 

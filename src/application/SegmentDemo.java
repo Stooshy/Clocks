@@ -61,7 +61,7 @@ public class SegmentDemo extends Application
 	@Override
 	public void init()
 	{
-		counter = new TimeCounter(0, 0, 10, 0);
+		counter = TimeCounter.getInstance();
 		stopWatchDisplay = new SevenSegmentsDisplayStopWatch();
 		stopWatchDisplay.setTimeProvider(counter);
 
@@ -92,8 +92,7 @@ public class SegmentDemo extends Application
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
 		mainContainer.setScreen(WATCH_SCREEN);
-		addMouseListeners(stage, mainContainer);
-		addMouseListeners(stage, borderPane);
+		addMouseListeners(stage, mainContainer, borderPane);
 
 		// ********* timelines for time and counter********
 		final Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
@@ -112,7 +111,7 @@ public class SegmentDemo extends Application
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				if (!counter.count())
+				if (!TimeCounter.count())
 				{
 					try
 					{
@@ -129,56 +128,59 @@ public class SegmentDemo extends Application
 				}
 				stopWatchDisplay.consumeTime();
 			}
-		}), new KeyFrame(Duration.millis(110)));
+		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 		stage.show();
 	}
 
 
-	private void addMouseListeners(Stage stage, Node node)
+	private void addMouseListeners(Stage stage, Node... nodes)
 	{
-		final Delta dragDelta = new Delta();
-		node.setOnMouseDragged(new EventHandler<MouseEvent>()
+		for (Node nodeToAdd : nodes)
 		{
-			@Override
-			public void handle(MouseEvent event)
+			final Delta dragDelta = new Delta();
+			nodeToAdd.setOnMouseDragged(new EventHandler<MouseEvent>()
 			{
-				stage.setX(event.getScreenX() + dragDelta.x);
-				stage.setY(event.getScreenY() + dragDelta.y);
-			}
-		});
-		node.setOnMousePressed(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				// record a delta distance for the drag and drop operation.
-				dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-				dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-			}
-		});
-		node.setOnMouseClicked(new EventHandler<MouseEvent>()
-		{
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
+				@Override
+				public void handle(MouseEvent event)
 				{
-					if (mouseEvent.getClickCount() == 2)
+					stage.setX(event.getScreenX() + dragDelta.x);
+					stage.setY(event.getScreenY() + dragDelta.y);
+				}
+			});
+			nodeToAdd.setOnMousePressed(new EventHandler<MouseEvent>()
+			{
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					// record a delta distance for the drag and drop operation.
+					dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+					dragDelta.y = stage.getY() - mouseEvent.getScreenY();
+				}
+			});
+			nodeToAdd.setOnMouseClicked(new EventHandler<MouseEvent>()
+			{
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
 					{
-						if (showCounter.isSelected())
+						if (mouseEvent.getClickCount() == 2)
 						{
-							if (counterLine.getStatus() == Status.STOPPED)
+							if (showCounter.isSelected())
 							{
-								counter.reset();
-								stopWatchDisplay.consumeTime();
-								stopWatchDisplay.setTimeProvider((TimeProvider) stopWatchDisplay);
+								if (counterLine.getStatus() == Status.STOPPED)
+								{
+									TimeCounter.reset();
+									stopWatchDisplay.consumeTime();
+									stopWatchDisplay.setTimeProvider((TimeProvider) stopWatchDisplay);
+								}
 							}
 						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 
@@ -227,7 +229,7 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						counter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
+						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
 								((TimeProvider) stopWatchDisplay).getSeconds(),
 								((TimeProvider) stopWatchDisplay).getMilliSeconds());
 						stopWatchDisplay.setTimeProvider(counter);
@@ -261,12 +263,12 @@ public class SegmentDemo extends Application
 					if (newValue)
 					{
 						counterMode.setSkinText(">");
-						counter.setMode(CounterMode.UP);
+						TimeCounter.setMode(CounterMode.UP);
 					}
 					else
 					{
 						counterMode.setSkinText("<");
-						counter.setMode(CounterMode.DOWN);
+						TimeCounter.setMode(CounterMode.DOWN);
 					}
 				}
 			});

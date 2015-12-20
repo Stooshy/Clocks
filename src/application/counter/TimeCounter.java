@@ -6,22 +6,19 @@ import application.gui.TimeProvider;
 
 public class TimeCounter implements TimeProvider
 {
-	private int seconds;
-	private int minutes;
-	private int milliSeconds;
 	private static int actMilliSeconds;
 	private static int actSeconds;
 	private static int actMinutes;
-	private CounterMode mode;
-	private static int lastSec = 0;
+	private static CounterMode mode;
+
+	private static TimeCounter _instance;
 
 
-	public TimeCounter(int h, int min, int sec, int milli)
+	public static TimeCounter getInstance()
 	{
-		mode = CounterMode.DOWN;
-		actMilliSeconds = milli;
-		actSeconds = seconds = sec;
-		actMinutes = minutes = min;
+		if (_instance == null)
+			_instance = new TimeCounter();
+		return _instance;
 	}
 
 
@@ -55,11 +52,11 @@ public class TimeCounter implements TimeProvider
 
 	/**
 	 * Decrements or increments the counter by 1 second if the last call to
-	 * count() was > 1s ago.
+	 * count() was > 999ms ago.
 	 * 
 	 * @return false if the counter would reached max/min value.
 	 */
-	public boolean count()
+	public static boolean count()
 	{
 		if (mode == CounterMode.UP)
 			return increment();
@@ -68,7 +65,7 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	private boolean decrement()
+	private static boolean decrement()
 	{
 		if (actSeconds == 0 && actMinutes == 0)
 		{
@@ -76,13 +73,10 @@ public class TimeCounter implements TimeProvider
 			return false;
 		}
 
-		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
+		if (actMilliSeconds < (999 - LocalTimeProvider.getInstance().getMilliSeconds()))
 		{
-			if (actSeconds > 0)
-			{
-				actSeconds--;
-			}
-			else
+			actSeconds--;
+			if (actSeconds == 0)
 			{
 				if (actMinutes > 0)
 				{
@@ -91,61 +85,55 @@ public class TimeCounter implements TimeProvider
 				}
 			}
 		}
-		actMilliSeconds = 1000 - LocalTimeProvider.getInstance().getMilliSeconds();
-		lastSec = LocalTimeProvider.getInstance().getSeconds();
+		actMilliSeconds = 999 - LocalTimeProvider.getInstance().getMilliSeconds();
 		return true;
 	}
 
 
-	/**
-	 * Increments the counter by 1 second.
-	 * 
-	 * @return false if the counter was max before incrementing it.
-	 *         <p>
-	 *         max 99:59:59
-	 *         </p>
-	 */
-	private boolean increment()
+	private static boolean increment()
 	{
 		if (actMinutes == 99 && actSeconds == 59)
 			return false;
 
-		if (lastSec < LocalTimeProvider.getInstance().getSeconds())
+		if (actMilliSeconds > LocalTimeProvider.getInstance().getMilliSeconds())
 		{
 			actSeconds++;
 			if (actSeconds == 60)
 			{
-				actSeconds = 59;
-				if (actMinutes < 59)
+				if (actMinutes < 99)
 				{
-					actMinutes++;
 					actSeconds = 0;
+					actMinutes++;
+				}
+				else
+				{
+					actMilliSeconds = 0;
+					actMinutes = 59;
 				}
 			}
 		}
 		actMilliSeconds = LocalTimeProvider.getInstance().getMilliSeconds();
-		lastSec = LocalTimeProvider.getInstance().getSeconds();
 		return true;
 	}
 
 
-	public void set(int minutes, int seconds, int milliSeconds)
+	public static void set(int minutes, int seconds, int milliSeconds)
 	{
-		actSeconds = this.seconds = seconds;
-		actMinutes = this.minutes = minutes;
-		actMilliSeconds = this.milliSeconds = milliSeconds;
+		actSeconds = seconds;
+		actMinutes = minutes;
+		actMilliSeconds = milliSeconds;
 	}
 
 
-	public void reset()
+	public static void reset()
 	{
-		actSeconds = this.seconds;
-		actMinutes = this.minutes;
-		actMilliSeconds = this.milliSeconds;
+		actSeconds = 0;
+		actMinutes = 0;
+		actMilliSeconds = 0;
 	}
 
 
-	public void setMode(CounterMode newMode)
+	public static void setMode(CounterMode newMode)
 	{
 		mode = newMode;
 	}

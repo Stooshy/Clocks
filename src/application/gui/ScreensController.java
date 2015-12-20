@@ -49,9 +49,7 @@ import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -64,25 +62,6 @@ public class ScreensController extends StackPane
 	public void addScreen(String name, Node screen)
 	{
 		screens.put(name, screen);
-	}
-
-
-	public boolean loadScreen(String name, String resource)
-	{
-		try
-		{
-			FXMLLoader myLoader = new FXMLLoader(getClass().getResource(resource));
-			Parent loadScreen = (Parent) myLoader.load();
-			ControlledScreen myScreenControler = ((ControlledScreen) myLoader.getController());
-			myScreenControler.setScreenParent(this);
-			addScreen(name, loadScreen);
-			return true;
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.getMessage());
-			return false;
-		}
 	}
 
 
@@ -134,17 +113,4 @@ public class ScreensController extends StackPane
 		}
 	}
 
-
-	public boolean unloadScreen(String name)
-	{
-		if (screens.remove(name) == null)
-		{
-			System.out.println("Screen didn't exist");
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
 }

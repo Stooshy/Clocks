@@ -12,13 +12,7 @@ public class LocalTimeProvider implements TimeProvider
 	public static TimeProvider getInstance()
 	{
 		if (_instance == null)
-		{
-			synchronized (LocalTimeProvider.class)
-			{
-				if (_instance == null)
-					_instance = new LocalTimeProvider();
-			}
-		}
+			_instance = new LocalTimeProvider();
 		return _instance;
 	}
 
