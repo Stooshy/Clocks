@@ -9,6 +9,7 @@ import application.gui.CounterMode;
 import application.gui.ScreensController;
 import application.gui.TimeProvider;
 import application.gui.ledbutton.LedButton;
+import application.gui.ledclock.LedControl;
 import application.gui.segment.SevenSegmentsDisplay;
 import application.gui.segment.SevenSegmentsDisplayStopWatch;
 import application.gui.segment.TimeConsumer;
@@ -52,8 +53,10 @@ public class SegmentDemo extends Application
 	private LedButton showCounter;
 	private Timeline counterLine;
 	private LedButton go;
-	private TimeConsumer watchDisplay;
+	private TimeConsumer watchDisplay1;
+	private TimeConsumer watchDisplay2;
 	public static final String WATCH_SCREEN = "watch";
+	public static final String WATCH_SCREEN2 = "watch2";
 	public static final String COUNTER_SCREEN = "counter";
 	private ScreensController mainContainer;
 
@@ -65,11 +68,15 @@ public class SegmentDemo extends Application
 		stopWatchDisplay = new SevenSegmentsDisplayStopWatch();
 		stopWatchDisplay.setTimeProvider(counter);
 
-		watchDisplay = new SevenSegmentsDisplay();
-		watchDisplay.setTimeProvider(LocalTimeProvider.getInstance());
+		watchDisplay1 = new SevenSegmentsDisplay();
+		watchDisplay1.setTimeProvider(LocalTimeProvider.getInstance());
+
+		watchDisplay2 = new LedControl();
+		watchDisplay2.setTimeProvider(LocalTimeProvider.getInstance());
 
 		mainContainer = new ScreensController();
-		mainContainer.addScreen(WATCH_SCREEN, ((SevenSegmentsDisplay) watchDisplay).getPane());
+		mainContainer.addScreen(WATCH_SCREEN2, ((LedControl) watchDisplay2));
+		mainContainer.addScreen(WATCH_SCREEN, ((SevenSegmentsDisplay) watchDisplay1).getPane());
 		mainContainer.addScreen(COUNTER_SCREEN, ((SevenSegmentsDisplay) stopWatchDisplay).getPane());
 	}
 
@@ -87,11 +94,12 @@ public class SegmentDemo extends Application
 		borderPane.setTop(new Buttons());
 		mainContainer.setScreen(COUNTER_SCREEN);
 		borderPane.setCenter(mainContainer);
-		Scene scene = new Scene(borderPane, 210, 120);
+		Scene scene = new Scene(borderPane, 325, 350);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
-		mainContainer.setScreen(WATCH_SCREEN);
+		mainContainer.setScreen(WATCH_SCREEN2);
+
 		addMouseListeners(stage, mainContainer, borderPane);
 
 		// ********* timelines for time and counter********
@@ -100,7 +108,8 @@ public class SegmentDemo extends Application
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				watchDisplay.consumeTime();
+				watchDisplay2.consumeTime();
+				watchDisplay1.consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(100)));
 		watchLine.setCycleCount(Animation.INDEFINITE);
@@ -212,7 +221,8 @@ public class SegmentDemo extends Application
 					}
 					else
 					{
-						mainContainer.setScreen(WATCH_SCREEN);
+						mainContainer.setScreen(WATCH_SCREEN2);
+
 					}
 				}
 			});

@@ -65,6 +65,12 @@ public class ScreensController extends StackPane
 	}
 
 
+	public String getActivScreen()
+	{
+		return getChildren().get(0).getClass().toString();
+	}
+
+
 	@SuppressWarnings(
 	{
 			"unchecked", "rawtypes"
