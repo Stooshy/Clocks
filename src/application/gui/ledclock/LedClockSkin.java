@@ -9,11 +9,16 @@ import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.VPos;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedControl>
 {
@@ -27,6 +32,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	private final List<Region> minutes = new ArrayList<Region>();
 	private final List<Region> hours = new ArrayList<Region>();
 	private final List<Region> lines = new ArrayList<Region>();
+	private Text text;
 
 
 	public LedClockSkin(LedControl control)
@@ -79,14 +85,16 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			off.getStyleClass().setAll("off-led");
 			pane.getChildren().add(off);
 			minutes.add(off);
-			if ((idx + 1) % 5 == 1)
+			if ((idx + 1) % 10 == 1)
 			{
 				Region line = new Region();
 				line.getStyleClass().setAll("line");
-				line.setPrefSize(1, 80);
-				line.setRotate(idx * 30);
+				line.setRotate(-idx * 60);
 				pane.getChildren().add(line);
 				lines.add(line);
+			}
+			if ((idx + 1) % 5 == 1)
+			{
 				off.setStyle("-led-color: " + colorToCss(Color.RED) + ";");
 			}
 		}
@@ -99,6 +107,16 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			pane.getChildren().add(off);
 			hours.add(off);
 		}
+
+		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 40.0);
+		text = new Text(getSkinnable().getSkinText());
+		text.setFont(font);
+		text.setTextOrigin(VPos.TOP);
+		text.getStyleClass().add("text");
+		text.setMouseTransparent(true);
+		text.setText(getSkinnable().getSkinText());
+
+		pane.getChildren().add(text);
 		pane.setMouseTransparent(true);
 		getChildren().setAll(pane);
 		resize();
@@ -201,6 +219,15 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				resize();
 			}
 		});
+		getSkinnable().textSkinProperty().addListener(new ChangeListener<String>()
+		{
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				text.setText(getSkinnable().getSkinText());
+			}
+		});
 	}
 
 
@@ -213,26 +240,27 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			return;
 		}
-		pane.setPrefSize(size + 10, size + 10);
-		int idx = lines.size() / 2;
+		size = size - 10;
+		pane.setPrefSize(size, size);
+		int idx = 3;
 		for (Region line : lines)
 		{
-			double y1 = (size - 0.75 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
-			double x1 = (size - 0.75 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
+			double y1 = (size - 0.8 * size) * ((Math.cos(60 * idx * Math.PI / 180)));
+			double x1 = (size - 0.8 * size) * ((Math.sin(60 * idx * Math.PI / 180)));
 			line.setTranslateX(size / 2 + x1 + (size * 0.026));
 			line.setTranslateY(size / 2 + y1 - (size * 0.095));
-			line.setPrefSize(0.003 * size, 0.2 * size);
+			line.setPrefSize(0.005 * size, 0.2 * size);
 			idx++;
 		}
 
-		idx = minutes.size() / 2;
+		idx = 30;
 		for (Region min : minutes)
 		{
 			double y1 = (size - 0.55 * size) * ((Math.cos(6 * idx * Math.PI / 180)));
 			double x1 = (size - 0.55 * size) * ((Math.sin(6 * idx * Math.PI / 180)));
 			min.setTranslateX(size / 2 + x1 + (size * 0.017543859649));
-			min.setTranslateY(size / 2 + y1 - (size * 0.0040479876161));
-			min.setPrefSize(0.02 * size, 0.02 * size);
+			min.setTranslateY(size / 2 + y1 - (size * 0.004047987616));
+			min.setPrefSize(0.025 * size, 0.025 * size);
 			idx--;
 
 		}
@@ -240,13 +268,24 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		idx = hours.size() / 2;
 		for (Region h : hours)
 		{
-			double y1 = (size - 0.2 * size) / 2 * (Math.cos(30 * idx * Math.PI / 180));
-			double x1 = (size - 0.2 * size) / 2 * (Math.sin(30 * idx * Math.PI / 180));
-			h.setTranslateX(size / 2 + x1 + (size * 0.0185758513931));
-			h.setTranslateY(size / 2 + y1 - (size * 0.0040479876161));
-			h.setPrefSize(0.02 * size, 0.02 * size);
+			double y1 = (size - 0.3 * size) / 2 * (Math.cos(30 * idx * Math.PI / 180));
+			double x1 = (size - 0.3 * size) / 2 * (Math.sin(30 * idx * Math.PI / 180));
+			h.setTranslateX(size / 2 + x1 + (size * 0.018575851393));
+			h.setTranslateY(size / 2 + y1 - (size * 0.004047987616));
+			h.setPrefSize(0.025 * size, 0.025 * size);
 			idx--;
 		}
+
+		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 10.0 / 144.0 * size);
+		text.setFont(font);
+		
+		if (text.getLayoutBounds().getWidth() > 0.78 * size)
+		{
+			text.setText("...");
+		}
+		
+		text.setTranslateY((size / 2 - (text.getLayoutBounds().getHeight()) * 0.5));
+		text.setTranslateX((size / 2 + (text.getLayoutBounds().getWidth() - 15) * 0.5));
 	}
 
 }

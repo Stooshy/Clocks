@@ -7,6 +7,8 @@ import application.gui.segment.TimeConsumer;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.Control;
@@ -20,6 +22,7 @@ public class LedControl extends Control implements TimeConsumer
 	private TimeProvider timeProvider;
 	private ObjectProperty<Color> ledColor;
 	private int lastSec;
+	private StringProperty text;
 
 
 	public LedControl()
@@ -27,6 +30,7 @@ public class LedControl extends Control implements TimeConsumer
 		getStyleClass().add("ledclock");
 		setPadding(new Insets(5, 5, 5, 5));
 		ledColor = new SimpleObjectProperty<>(Color.YELLOW);
+		text = new SimpleStringProperty(this, "text", "test");
 	}
 
 
@@ -54,6 +58,24 @@ public class LedControl extends Control implements TimeConsumer
 	}
 
 
+	public String getSkinText()
+	{
+		return text.get();
+	}
+
+
+	public void setSkinText(String value)
+	{
+		text.set(value);
+	}
+
+
+	public final StringProperty textSkinProperty()
+	{
+		return text;
+	}
+
+
 	public void count(boolean up)
 	{
 		setMinutes(multiPlexerM.getNumber() + 1);
@@ -78,13 +100,14 @@ public class LedControl extends Control implements TimeConsumer
 
 	private void setSeconds(int value)
 	{
+		setSkinText("" + value);
 		multiPlexerS.set(value);
 	}
 
 
 	private void setMinutes(int value)
 	{
-		multiPlexerM.set(value+1);
+		multiPlexerM.set(value + 1);
 	}
 
 

@@ -56,12 +56,13 @@ import javafx.util.Duration;
 public class ScreensController extends StackPane
 {
 
-	private HashMap<String, Node> screens = new HashMap<>();
+	private HashMap<Integer, Node> screens = new HashMap<>();
+	private Integer actScreen;
 
 
-	public void addScreen(String name, Node screen)
+	public void addScreen(int id, Node screen)
 	{
-		screens.put(name, screen);
+		screens.put(id, screen);
 	}
 
 
@@ -71,13 +72,19 @@ public class ScreensController extends StackPane
 	}
 
 
+	public void setNextScreen()
+	{
+		setScreen((actScreen % screens.size()) + 1);
+	}
+
+
 	@SuppressWarnings(
 	{
 			"unchecked", "rawtypes"
 	})
-	public boolean setScreen(final String name)
+	public boolean setScreen(final int id)
 	{
-		if (screens.get(name) != null)
+		if (screens.get(id) != null)
 		{ // screen loaded
 			final DoubleProperty opacity = opacityProperty();
 
@@ -92,7 +99,7 @@ public class ScreensController extends StackPane
 									public void handle(Event t)
 									{
 										getChildren().remove(0);
-										getChildren().add(0, screens.get(name));
+										getChildren().add(0, screens.get(id));
 										Timeline fadeIn = new Timeline(
 												new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
 												new KeyFrame(new Duration(200), new KeyValue(opacity, 1.0)));
@@ -100,12 +107,13 @@ public class ScreensController extends StackPane
 									}
 								}, new KeyValue(opacity, 0.0)));
 				fade.play();
+				setActScreen(id);
 			}
 			else
 			{
 				// no one else been displayed, then just show
 				setOpacity(0.0);
-				getChildren().add(screens.get(name));
+				getChildren().add(screens.get(id));
 				Timeline fadeIn = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
 						new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
@@ -117,6 +125,18 @@ public class ScreensController extends StackPane
 			System.out.println("screen hasn't been loaded!\n");
 			return false;
 		}
+	}
+
+
+	public Integer getActScreen()
+	{
+		return actScreen;
+	}
+
+
+	private void setActScreen(int id)
+	{
+		this.actScreen = id;
 	}
 
 }

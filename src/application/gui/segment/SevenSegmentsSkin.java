@@ -185,9 +185,10 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 		double scaleY = getSkinnable().getHeight() / PREFERRED_HEIGHT;
 		getSkinnable().setScaleY(scaleY);
 		getSkinnable().setScaleX(scaleX);
-		pane.setScaleY(scaleY);
-		pane.setScaleX(scaleX);
-	
+		pane.setPrefSize(getSkinnable().getWidth(), getSkinnable().getHeight());
+		pane.setTranslateX(-size / 2);
+		pane.setTranslateY(-size);
+
 	}
 
 }

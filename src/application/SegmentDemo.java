@@ -55,10 +55,11 @@ public class SegmentDemo extends Application
 	private LedButton go;
 	private TimeConsumer watchDisplay1;
 	private TimeConsumer watchDisplay2;
-	public static final String WATCH_SCREEN = "watch";
-	public static final String WATCH_SCREEN2 = "watch2";
-	public static final String COUNTER_SCREEN = "counter";
+	public static final int WATCH_SCREEN = 1;
+	public static final int WATCH_SCREEN2 = 2;
+	public static final int COUNTER_SCREEN = 3;
 	private ScreensController mainContainer;
+	private Stage stage;
 
 
 	@Override
@@ -84,6 +85,7 @@ public class SegmentDemo extends Application
 	@Override
 	public void start(Stage stage)
 	{
+		this.stage = stage;
 		stage.initStyle(StageStyle.TRANSPARENT);
 		stage.setAlwaysOnTop(true);
 		stage.getIcons().add(new Image("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/logo.png"));
@@ -94,13 +96,14 @@ public class SegmentDemo extends Application
 		borderPane.setTop(new Buttons());
 		mainContainer.setScreen(COUNTER_SCREEN);
 		borderPane.setCenter(mainContainer);
-		Scene scene = new Scene(borderPane, 325, 350);
+		Scene scene = new Scene(borderPane, 232, 263);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
-		mainContainer.setScreen(WATCH_SCREEN2);
+		stage.setResizable(true);
 
-		addMouseListeners(stage, mainContainer, borderPane);
+		mainContainer.setScreen(WATCH_SCREEN2);
+		addMouseListeners(stage, ((LedControl) watchDisplay2), borderPane);
 
 		// ********* timelines for time and counter********
 		final Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
@@ -140,6 +143,18 @@ public class SegmentDemo extends Application
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 		stage.show();
+	}
+
+
+	private void setCurrentWidthToStage(double number2)
+	{
+		stage.setWidth(number2);
+	}
+
+
+	private void setCurrentHeightToStage(double number2)
+	{
+		stage.setHeight(number2);
 	}
 
 
@@ -206,26 +221,35 @@ public class SegmentDemo extends Application
 			setId("TOPPANE");
 			showCounter = new LedButton("\nShow daytime or counter.");
 			showCounter.setSkinText("M");
-			showCounter.selectedProperty().addListener(new ChangeListener<Boolean>()
+
+			showCounter.setOnMouseClicked(new EventHandler<MouseEvent>()
 			{
 				@Override
-				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+				public void handle(MouseEvent mouseEvent)
 				{
-					if (newValue)
+					mainContainer.setNextScreen();
+					if (mainContainer.getActScreen() == WATCH_SCREEN2)
 					{
+						setCurrentWidthToStage(232);
+						setCurrentHeightToStage(263);
+					}
+					else if (mainContainer.getActScreen() == COUNTER_SCREEN)
+					{
+						setCurrentWidthToStage(225);
+						setCurrentHeightToStage(110);
 						if ((counterLine.getStatus() == Status.STOPPED))
 						{
 							stopWatchDisplay.consumeTime();
 						}
-						mainContainer.setScreen(COUNTER_SCREEN);
 					}
 					else
 					{
-						mainContainer.setScreen(WATCH_SCREEN2);
-
+						setCurrentWidthToStage(225);
+						setCurrentHeightToStage(110);
 					}
 				}
 			});
+
 			add(showCounter, 0, 0);
 			GridPane.setValignment(showCounter, VPos.CENTER);
 			GridPane.setHalignment(showCounter, HPos.CENTER);
