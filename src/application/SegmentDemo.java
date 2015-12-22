@@ -52,6 +52,7 @@ public class SegmentDemo extends Application
 	private TimeCounter counter;
 	private LedButton showCounter;
 	private Timeline counterLine;
+	private Timeline watchLine;
 	private LedButton go;
 	private TimeConsumer watchDisplay1;
 	private TimeConsumer watchDisplay2;
@@ -60,6 +61,7 @@ public class SegmentDemo extends Application
 	public static final int COUNTER_SCREEN = 3;
 	private ScreensController mainContainer;
 	private Stage stage;
+
 
 	@Override
 	public void init()
@@ -79,6 +81,7 @@ public class SegmentDemo extends Application
 		mainContainer.addScreen(WATCH_SCREEN, ((SevenSegmentsDisplay) watchDisplay1).getPane());
 		mainContainer.addScreen(COUNTER_SCREEN, ((SevenSegmentsDisplay) stopWatchDisplay).getPane());
 	}
+
 
 	@Override
 	public void start(Stage stage)
@@ -104,7 +107,7 @@ public class SegmentDemo extends Application
 		addMouseListeners(stage, ((LedControl) watchDisplay2), borderPane);
 
 		// ********* timelines for time and counter********
-		final Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent actionEvent)
@@ -115,7 +118,7 @@ public class SegmentDemo extends Application
 		}), new KeyFrame(Duration.millis(100)));
 		watchLine.setCycleCount(Animation.INDEFINITE);
 		watchLine.play();
-
+		
 		counterLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
@@ -126,10 +129,12 @@ public class SegmentDemo extends Application
 					try
 					{
 						go.setSelected(false);
-						Media media = new Media("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/bell.mp3");
+						Media media = new Media(
+								"file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/bell.mp3");
 						MediaPlayer player = new MediaPlayer(media);
 						player.play();
-					} catch (Exception e)
+					}
+					catch (Exception e)
 					{
 						e.printStackTrace();
 					}
@@ -138,22 +143,25 @@ public class SegmentDemo extends Application
 			}
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
-		
+
 		mainContainer.setScreen(WATCH_SCREEN);
 		setStageSize();
 		stage.show();
-		
+
 	}
+
 
 	private void setCurrentWidthToStage(double number2)
 	{
 		stage.setWidth(number2);
 	}
 
+
 	private void setCurrentHeightToStage(double number2)
 	{
 		stage.setHeight(number2);
 	}
+
 
 	private void addMouseListeners(final Stage stage, Node... nodes)
 	{
@@ -203,6 +211,7 @@ public class SegmentDemo extends Application
 		}
 	}
 
+
 	public static void main(String[] args)
 	{
 		Application.launch(args);
@@ -214,7 +223,7 @@ public class SegmentDemo extends Application
 		public Buttons()
 		{
 			setId("TOPPANE");
-			showCounter = new LedButton("\nShow daytime or counter.");
+			showCounter = new LedButton("\nSwitch between displays.");
 			showCounter.setSkinText("M");
 
 			showCounter.setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -231,7 +240,8 @@ public class SegmentDemo extends Application
 			GridPane.setValignment(showCounter, VPos.CENTER);
 			GridPane.setHalignment(showCounter, HPos.CENTER);
 
-			go = new LedButton();
+			go = new LedButton(
+					"\nStart or stop counter.\nIf the counter is stopped douple click on display will reset to 0.\nClick on digit to change value");
 			go.setSkinText("Go");
 			go.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
@@ -240,14 +250,17 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(), ((TimeProvider) stopWatchDisplay).getSeconds(),
+						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
+								((TimeProvider) stopWatchDisplay).getSeconds(),
 								((TimeProvider) stopWatchDisplay).getMilliSeconds());
-						stopWatchDisplay.setTimeProvider(counter);
+						stopWatchDisplay.setTimeProvider(TimeCounter.getInstance());
 						SegmentDemo.this.counterLine.play();
-					} else if (counterLine.getStatus() == Status.RUNNING)
+					}
+					else if (counterLine.getStatus() == Status.RUNNING)
 					{
 						SegmentDemo.this.counterLine.pause();
-					} else if (counterLine.getStatus() == Status.PAUSED)
+					}
+					else if (counterLine.getStatus() == Status.PAUSED)
 					{
 						SegmentDemo.this.counterLine.play();
 					}
@@ -261,7 +274,7 @@ public class SegmentDemo extends Application
 			GridPane.setValignment(go, VPos.CENTER);
 			GridPane.setHalignment(go, HPos.CENTER);
 
-			final LedButton counterMode = new LedButton();
+			final LedButton counterMode = new LedButton("\nToggle counter mode between in- or decrement (default).");
 			counterMode.setSkinText("<");
 			counterMode.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
@@ -272,7 +285,8 @@ public class SegmentDemo extends Application
 					{
 						counterMode.setSkinText(">");
 						TimeCounter.setMode(CounterMode.UP);
-					} else
+					}
+					else
 					{
 						counterMode.setSkinText("<");
 						TimeCounter.setMode(CounterMode.DOWN);
@@ -313,9 +327,9 @@ public class SegmentDemo extends Application
 			dateLine.setCycleCount(Animation.INDEFINITE);
 			dateLine.play();
 
-			LedButton closeBtn = new LedButton();
-			closeBtn.setSkinText("|");
-			closeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
+			LedButton resizeBtn = new LedButton("\nMinimize or maximize window");
+			resizeBtn.setSkinText("|");
+			resizeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
@@ -324,15 +338,18 @@ public class SegmentDemo extends Application
 					{
 						setCurrentHeightToStage(stage.getMaxHeight());
 						setCurrentWidthToStage(stage.getMaxWidth());
-					} else
+						resizeBtn.setSkinText("o");
+					}
+					else
 					{
 						setStageSize();
+						resizeBtn.setSkinText("|");
 					}
 				}
 			});
-			add(closeBtn, 5, 0);
+			add(resizeBtn, 5, 0);
 
-			closeBtn = new LedButton();
+			final LedButton closeBtn = new LedButton("Quit");
 			closeBtn.setSkinText("X");
 			closeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
@@ -372,24 +389,29 @@ public class SegmentDemo extends Application
 		}
 	}
 
+
 	private void setStageSize()
 	{
 		if (mainContainer.getActScreen() == WATCH_SCREEN2)
 		{
 			setCurrentWidthToStage(240);
 			setCurrentHeightToStage(290);
-		} else if (mainContainer.getActScreen() == COUNTER_SCREEN)
+		}
+		else if (mainContainer.getActScreen() == COUNTER_SCREEN)
 		{
+			watchLine.pause();
 			setCurrentWidthToStage(225);
 			setCurrentHeightToStage(115);
 			if ((counterLine.getStatus() == Status.STOPPED))
 			{
 				stopWatchDisplay.consumeTime();
 			}
-		} else
+		}
+		else
 		{
 			setCurrentWidthToStage(225);
 			setCurrentHeightToStage(115);
+			watchLine.play();
 		}
 	}
 

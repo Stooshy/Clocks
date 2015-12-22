@@ -122,18 +122,18 @@
 }
 
 #ledclockpane{
-   -fx-background-color:   derive(rgba(240.0, 240.0, 240.0, 1.0), -10.0%) 73.0%;
-  -fx-background-insets: 0.0, 1.0;
-  -fx-background-repeat: no-repeat;
-  -fx-background-position: center;
-  -fx-scale-shape     : true;  
-  -fx-background-radius: 30.0;
-  -fx-border-radius: 30.0;
+    -fx-background-color: 
+        #c3c4c4,
+        linear-gradient(rgb(240,240,240) 50.0%, #d7d7d7  100.0% );
+    -fx-background-radius: 30.0;
+    -fx-background-insets: 0.0,1.0,1.0;
+    -fx-text-fill: black;
+    
 	
 }
 .ledclock{
 	-fx-skin  : "application.gui.ledclock.LedClockSkin";
-	 -led-color:  rgb(0.0, 250, 0.0);
+	 -led-color:  rgb(0.0, 250.0, 0.0);
 }
 
 .ledclock .on-led {

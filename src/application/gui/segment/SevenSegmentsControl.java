@@ -22,7 +22,8 @@ public final class SevenSegmentsControl extends Control implements SevenDigitsHa
 
 	public void addNewValueListener(InvalidationListener toAdd)
 	{
-		multiPlexer.getBitsProperty().addListener(toAdd);
+		multiPlexer.addListener(toAdd);
+		set(SevenDigit.ZERO);
 	}
 
 

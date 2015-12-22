@@ -37,6 +37,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	private final List<Region> lines = new ArrayList<Region>();
 	private Text text;
 
+
 	public LedClockSkin(LedControl control)
 	{
 		super(control);
@@ -47,30 +48,37 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		addListeners();
 	}
 
+
 	private void init()
 	{
-		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
 		{
 			if (getSkinnable().getPrefWidth() > 0 && getSkinnable().getPrefHeight() > 0)
 			{
 				getSkinnable().setPrefSize(getSkinnable().getPrefWidth(), getSkinnable().getPrefHeight());
-			} else
+			}
+			else
 			{
 				getSkinnable().setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
 			}
 		}
 
-		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
 		{
 			getSkinnable().setMinSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
 		}
 
-		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
 		{
 			getSkinnable().setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGHTS);
 		}
 	}
+
 
 	private void buildPane()
 	{
@@ -95,7 +103,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			minute.setMouseTransparent(true);
 
 			InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
-			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX, getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
+			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX,
+					getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
 			ledOnGlow.setOffsetX(0.0);
 			ledOnGlow.setOffsetY(0.0);
 			ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
@@ -119,9 +128,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			hour.getStyleClass().setAll("off-led");
 
 			InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
-			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX, getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
-			ledOnGlow.setOffsetX(0.0);
-			ledOnGlow.setOffsetY(0.0);
+			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX,
+					getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
 			ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
 			ledOnGlow.setColor(getSkinnable().getLedColor());
 			ledOnGlow.setBlurType(BlurType.TWO_PASS_BOX);
@@ -142,18 +150,20 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 
 		pane.getChildren().add(text);
 		pane.setMouseTransparent(true);
-		InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
-		DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX, getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
-		ledOnGlow.setOffsetX(10.0);
-		ledOnGlow.setOffsetY(10.0);
-		ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
-		ledOnGlow.setColor(Color.GRAY.darker());
-		ledOnGlow.setBlurType(BlurType.TWO_PASS_BOX);
-		ledOnGlow.setInput(ledOnInnerShadow);
-		pane.setEffect(ledOnGlow);
+
+		InnerShadow paneInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 3, 0, -5, -5);
+		DropShadow paneDropShadow = new DropShadow(BlurType.TWO_PASS_BOX, Color.GRAY.darker().darker().darker(), 20, 0,
+				10, 10);
+		paneDropShadow.setRadius(10.0 / 250.0 * PREFERRED_WIDTH);
+		paneDropShadow.setColor(Color.GRAY.darker());
+		paneDropShadow.setBlurType(BlurType.TWO_PASS_BOX);
+		paneDropShadow.setInput(paneInnerShadow);
+		pane.setEffect(paneDropShadow);
+
 		getChildren().setAll(pane);
 		resize();
 	}
+
 
 	private void handleNewMinutes(Observable observable)
 	{
@@ -168,12 +178,14 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				if ((idx + 1) % 5 == 1)
 				{
 					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.RED);
-				} else
+				}
+				else
 					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.GREEN);
 
 				minutes.get(idx).getStyleClass().setAll("on-led");
 
-			} else
+			}
+			else
 			{
 				DropShadow ef = (DropShadow) minutes.get(idx).getEffect();
 				ef.setColor(Color.SILVER);
@@ -182,13 +194,16 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		}
 	}
 
+
 	public static String colorToCss(final Color COLOR)
 	{
 		StringBuilder cssColor = new StringBuilder();
-		cssColor.append("rgba(").append((int) (COLOR.getRed() * 255)).append(", ").append((int) (COLOR.getGreen() * 255)).append(", ")
-				.append((int) (COLOR.getBlue() * 255)).append(", ").append(COLOR.getOpacity()).append(");");
+		cssColor.append("rgba(").append((int) (COLOR.getRed() * 255)).append(", ")
+				.append((int) (COLOR.getGreen() * 255)).append(", ").append((int) (COLOR.getBlue() * 255)).append(", ")
+				.append(COLOR.getOpacity()).append(");");
 		return cssColor.toString();
 	}
+
 
 	private void handleNewSeconds(Observable observable)
 	{
@@ -196,12 +211,14 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			((DropShadow) minutes.get(0).getEffect()).setColor(Color.RED);
 			minutes.get(0).getStyleClass().setAll("on-led");
-		} else
+		}
+		else
 		{
 			((DropShadow) minutes.get(0).getEffect()).setColor(Color.SILVER);
 			minutes.get(0).getStyleClass().setAll("off-led");
 		}
 	}
+
 
 	private void handleNewHours(Observable observable)
 	{
@@ -214,13 +231,15 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			{
 				((DropShadow) hours.get(idx).getEffect()).setColor(Color.GREEN);
 				hours.get(idx).getStyleClass().setAll("on-led");
-			} else
+			}
+			else
 			{
 				((DropShadow) hours.get(idx).getEffect()).setColor(Color.SILVER);
 				hours.get(idx).getStyleClass().setAll("off-led");
 			}
 		}
 	}
+
 
 	private void addListeners()
 	{
@@ -281,9 +300,11 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		});
 	}
 
+
 	protected void resize()
 	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth() : getSkinnable().getHeight();
+		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
+				: getSkinnable().getHeight();
 
 		if (size == 0)
 		{
@@ -297,6 +318,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		resizeLeds(hours, 0.3, 30, size);
 		resizeText();
 	}
+
 
 	private void reszieLines(double size)
 	{
@@ -314,18 +336,20 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				newHeigths = Math.round(0.5 * size);
 				y1 = (size - 0.675 * size) * ((Math.cos(60 * idx * Math.PI / 180)));
 				x1 = (size - 0.675 * size) * ((Math.sin(60 * idx * Math.PI / 180)));
-			} else
+			}
+			else
 			{
 				newHeigths = Math.round(0.425 * size);
 				y1 = (size - 0.715 * size) * ((Math.cos(60 * idx * Math.PI / 180)));
 				x1 = (size - 0.715 * size) * ((Math.sin(60 * idx * Math.PI / 180)));
 			}
-			line.setTranslateX(size * 0.5 + x1 - (newWidth * 0.51));
+			line.setTranslateX(size * 0.5 + x1 - (newWidth * 0.4));
 			line.setTranslateY(size * 0.5 + y1 - (newHeigths * 0.5));
 			line.setPrefSize(newWidth, newHeigths);
 			idx++;
 		}
 	}
+
 
 	private static void resizeLeds(List<Region> nodes, double circleRad, double radStep, double size)
 	{
@@ -345,18 +369,21 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		}
 	}
 
+
 	private void resizeText()
 	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth() : getSkinnable().getHeight();
+		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
+				: getSkinnable().getHeight();
 
-		if (size == 0)
+		size = size - 10; // 10 = insets
+		if (size <= 0)
 		{
 			return;
 		}
-		size = size - 10; // 10 = insets
 		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 10.0 / 144 * size);
 		text.setFont(font);
-		double textWidth = com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(text.getText(), text.getFont());
+		double textWidth = com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(text.getText(),
+				text.getFont());
 
 		if (text.getLayoutBounds().getWidth() > 0.78 * size)
 		{

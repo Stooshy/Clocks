@@ -22,6 +22,12 @@ public class TimeCounter implements TimeProvider
 	}
 
 
+	private TimeCounter()
+	{
+		reset();
+	}
+
+
 	@Override
 	public int getHours()
 	{
