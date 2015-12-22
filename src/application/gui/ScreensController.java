@@ -56,7 +56,7 @@ import javafx.util.Duration;
 public class ScreensController extends StackPane
 {
 
-	private HashMap<Integer, Node> screens = new HashMap<>();
+	private HashMap<Integer, Node> screens = new HashMap<Integer, Node>();
 	private Integer actScreen;
 
 
@@ -107,7 +107,6 @@ public class ScreensController extends StackPane
 									}
 								}, new KeyValue(opacity, 0.0)));
 				fade.play();
-				setActScreen(id);
 			}
 			else
 			{
@@ -118,6 +117,7 @@ public class ScreensController extends StackPane
 						new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
 			}
+			setActScreen(id);
 			return true;
 		}
 		else

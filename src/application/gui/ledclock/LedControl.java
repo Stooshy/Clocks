@@ -29,7 +29,7 @@ public class LedControl extends Control implements TimeConsumer
 	{
 		getStyleClass().add("ledclock");
 		setPadding(new Insets(5, 5, 5, 5));
-		ledColor = new SimpleObjectProperty<>(Color.YELLOW);
+		ledColor = new SimpleObjectProperty<Color>(Color.GREEN);
 		text = new SimpleStringProperty(this, "text", "test");
 	}
 

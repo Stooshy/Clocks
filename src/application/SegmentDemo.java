@@ -61,7 +61,6 @@ public class SegmentDemo extends Application
 	private ScreensController mainContainer;
 	private Stage stage;
 
-
 	@Override
 	public void init()
 	{
@@ -81,7 +80,6 @@ public class SegmentDemo extends Application
 		mainContainer.addScreen(COUNTER_SCREEN, ((SevenSegmentsDisplay) stopWatchDisplay).getPane());
 	}
 
-
 	@Override
 	public void start(Stage stage)
 	{
@@ -94,15 +92,15 @@ public class SegmentDemo extends Application
 		final BorderPane borderPane = new BorderPane();
 		borderPane.setId("ROOTNODE");
 		borderPane.setTop(new Buttons());
-		mainContainer.setScreen(COUNTER_SCREEN);
 		borderPane.setCenter(mainContainer);
-		Scene scene = new Scene(borderPane, 232, 263);
+		Scene scene = new Scene(borderPane, 200, 260);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
 		stage.setResizable(true);
+		stage.setMaxHeight(945);
+		stage.setMaxWidth(900);
 
-		mainContainer.setScreen(WATCH_SCREEN2);
 		addMouseListeners(stage, ((LedControl) watchDisplay2), borderPane);
 
 		// ********* timelines for time and counter********
@@ -128,12 +126,10 @@ public class SegmentDemo extends Application
 					try
 					{
 						go.setSelected(false);
-						Media media = new Media(
-								"file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/bell.mp3");
+						Media media = new Media("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/bell.mp3");
 						MediaPlayer player = new MediaPlayer(media);
 						player.play();
-					}
-					catch (Exception e)
+					} catch (Exception e)
 					{
 						e.printStackTrace();
 					}
@@ -142,23 +138,24 @@ public class SegmentDemo extends Application
 			}
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
+		
+		mainContainer.setScreen(WATCH_SCREEN);
+		setStageSize();
 		stage.show();
+		
 	}
-
 
 	private void setCurrentWidthToStage(double number2)
 	{
 		stage.setWidth(number2);
 	}
 
-
 	private void setCurrentHeightToStage(double number2)
 	{
 		stage.setHeight(number2);
 	}
 
-
-	private void addMouseListeners(Stage stage, Node... nodes)
+	private void addMouseListeners(final Stage stage, Node... nodes)
 	{
 		for (Node nodeToAdd : nodes)
 		{
@@ -191,13 +188,12 @@ public class SegmentDemo extends Application
 					{
 						if (mouseEvent.getClickCount() == 2)
 						{
-							if (showCounter.isSelected())
+							if (mainContainer.getActScreen().equals(COUNTER_SCREEN))
 							{
 								if (counterLine.getStatus() == Status.STOPPED)
 								{
 									TimeCounter.reset();
 									stopWatchDisplay.consumeTime();
-									stopWatchDisplay.setTimeProvider((TimeProvider) stopWatchDisplay);
 								}
 							}
 						}
@@ -206,7 +202,6 @@ public class SegmentDemo extends Application
 			});
 		}
 	}
-
 
 	public static void main(String[] args)
 	{
@@ -228,25 +223,7 @@ public class SegmentDemo extends Application
 				public void handle(MouseEvent mouseEvent)
 				{
 					mainContainer.setNextScreen();
-					if (mainContainer.getActScreen() == WATCH_SCREEN2)
-					{
-						setCurrentWidthToStage(232);
-						setCurrentHeightToStage(263);
-					}
-					else if (mainContainer.getActScreen() == COUNTER_SCREEN)
-					{
-						setCurrentWidthToStage(225);
-						setCurrentHeightToStage(110);
-						if ((counterLine.getStatus() == Status.STOPPED))
-						{
-							stopWatchDisplay.consumeTime();
-						}
-					}
-					else
-					{
-						setCurrentWidthToStage(225);
-						setCurrentHeightToStage(110);
-					}
+					setStageSize();
 				}
 			});
 
@@ -263,17 +240,14 @@ public class SegmentDemo extends Application
 				{
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
-								((TimeProvider) stopWatchDisplay).getSeconds(),
+						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(), ((TimeProvider) stopWatchDisplay).getSeconds(),
 								((TimeProvider) stopWatchDisplay).getMilliSeconds());
 						stopWatchDisplay.setTimeProvider(counter);
 						SegmentDemo.this.counterLine.play();
-					}
-					else if (counterLine.getStatus() == Status.RUNNING)
+					} else if (counterLine.getStatus() == Status.RUNNING)
 					{
 						SegmentDemo.this.counterLine.pause();
-					}
-					else if (counterLine.getStatus() == Status.PAUSED)
+					} else if (counterLine.getStatus() == Status.PAUSED)
 					{
 						SegmentDemo.this.counterLine.play();
 					}
@@ -287,7 +261,7 @@ public class SegmentDemo extends Application
 			GridPane.setValignment(go, VPos.CENTER);
 			GridPane.setHalignment(go, HPos.CENTER);
 
-			LedButton counterMode = new LedButton();
+			final LedButton counterMode = new LedButton();
 			counterMode.setSkinText("<");
 			counterMode.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
@@ -298,8 +272,7 @@ public class SegmentDemo extends Application
 					{
 						counterMode.setSkinText(">");
 						TimeCounter.setMode(CounterMode.UP);
-					}
-					else
+					} else
 					{
 						counterMode.setSkinText("<");
 						TimeCounter.setMode(CounterMode.DOWN);
@@ -341,6 +314,25 @@ public class SegmentDemo extends Application
 			dateLine.play();
 
 			LedButton closeBtn = new LedButton();
+			closeBtn.setSkinText("|");
+			closeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
+			{
+				@Override
+				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+				{
+					if (newValue)
+					{
+						setCurrentHeightToStage(stage.getMaxHeight());
+						setCurrentWidthToStage(stage.getMaxWidth());
+					} else
+					{
+						setStageSize();
+					}
+				}
+			});
+			add(closeBtn, 5, 0);
+
+			closeBtn = new LedButton();
 			closeBtn.setSkinText("X");
 			closeBtn.selectedProperty().addListener(new ChangeListener<Boolean>()
 			{
@@ -350,7 +342,7 @@ public class SegmentDemo extends Application
 					Platform.exit();
 				}
 			});
-			add(closeBtn, 5, 0);
+			add(closeBtn, 6, 0);
 			GridPane.setValignment(closeBtn, VPos.CENTER);
 			GridPane.setHalignment(closeBtn, HPos.CENTER);
 
@@ -377,6 +369,27 @@ public class SegmentDemo extends Application
 			col.setHalignment(HPos.CENTER);
 			getColumnConstraints().add(col);
 
+		}
+	}
+
+	private void setStageSize()
+	{
+		if (mainContainer.getActScreen() == WATCH_SCREEN2)
+		{
+			setCurrentWidthToStage(240);
+			setCurrentHeightToStage(290);
+		} else if (mainContainer.getActScreen() == COUNTER_SCREEN)
+		{
+			setCurrentWidthToStage(225);
+			setCurrentHeightToStage(115);
+			if ((counterLine.getStatus() == Status.STOPPED))
+			{
+				stopWatchDisplay.consumeTime();
+			}
+		} else
+		{
+			setCurrentWidthToStage(225);
+			setCurrentHeightToStage(115);
 		}
 	}
 

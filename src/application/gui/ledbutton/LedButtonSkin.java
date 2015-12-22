@@ -56,7 +56,6 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 	private InnerShadow textInnerShadow;
 	private InnerShadow textInnerShadow1;
 
-
 	// ******************** Constructors **************************************
 	public LedButtonSkin(final LedButton CONTROL)
 	{
@@ -67,38 +66,31 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		registerListeners();
 	}
 
-
 	// ******************** Initialization ************************************
 	private void init()
 	{
-		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
+				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
 		{
 			if (getSkinnable().getPrefWidth() > 0 && getSkinnable().getPrefHeight() > 0)
 			{
 				getSkinnable().setPrefSize(getSkinnable().getPrefWidth(), getSkinnable().getPrefHeight());
-			}
-			else
+			} else
 			{
 				getSkinnable().setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
 			}
 		}
 
-		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
 		{
 			getSkinnable().setMinSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
 		}
 
-		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
+		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0 || Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
 		{
 			getSkinnable().setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGHT);
 		}
 	}
-
 
 	private void initGraphics()
 	{
@@ -184,7 +176,7 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		ledOnInnerShadow.setOffsetX(1.4142135623730951);
 		ledOnInnerShadow.setOffsetY(1.414213562373095);
 		ledOnInnerShadow.setRadius(1.0 / 144.0 * PREFERRED_WIDTH);
-		ledOnInnerShadow.setColor(getSkinnable().getLedColor().darker().darker().darker());
+		ledOnInnerShadow.setColor(getSkinnable().getLedColor().darker().darker());
 		ledOnInnerShadow.setBlurType(BlurType.TWO_PASS_BOX);
 		ledOnInnerShadow1 = new InnerShadow();
 		ledOnInnerShadow1.setOffsetX(-2.457456132866976);
@@ -228,7 +220,6 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		getChildren().setAll(pane);
 		resize();
 	}
-
 
 	private void registerListeners()
 	{
@@ -294,34 +285,29 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 
 	}
 
-
 	// ******************** Methods *******************************************
 	protected void handleControlPropertyChanged(final String PROPERTY)
 	{
 		if ("RESIZE".equals(PROPERTY))
 		{
 			resize();
-		}
-		else if ("SELECTED".equals(PROPERTY))
+		} else if ("SELECTED".equals(PROPERTY))
 		{
-			getSkinnable().fireSelectEvent(getSkinnable().isSelected()
-					? new LedButton.SelectEvent(getSkinnable(), getSkinnable(), LedButton.SelectEvent.SELECT)
-					: new LedButton.SelectEvent(getSkinnable(), getSkinnable(), LedButton.SelectEvent.DESELECT));
+			getSkinnable().fireSelectEvent(
+					getSkinnable().isSelected() ? new LedButton.SelectEvent(getSkinnable(), getSkinnable(), LedButton.SelectEvent.SELECT)
+							: new LedButton.SelectEvent(getSkinnable(), getSkinnable(), LedButton.SelectEvent.DESELECT));
 			on.setVisible(getSkinnable().isSelected());
-			ledOn.setVisible(getSkinnable().isSelected());
+			ledOn.setVisible(false);
 
 			off.setVisible(!getSkinnable().isSelected());
 			ledOff.setVisible(!getSkinnable().isSelected());
 
-			text.setTranslateY(getSkinnable().isSelected()
-					? (height - text.getLayoutBounds().getHeight()) * 0.49 + (3.0 / 144.0) * height
+			text.setTranslateY(getSkinnable().isSelected() ? (height - text.getLayoutBounds().getHeight()) * 0.49 + (3.0 / 144.0) * height
 					: (height - text.getLayoutBounds().getHeight()) * 0.49);
-		}
-		else if ("TEXT".equals(PROPERTY))
+		} else if ("TEXT".equals(PROPERTY))
 		{
 			text.setText(getSkinnable().getSkinText());
-		}
-		else if ("LED_COLOR".equals(PROPERTY))
+		} else if ("LED_COLOR".equals(PROPERTY))
 		{
 			ledOn.setStyle("-led-color: " + colorToCss(getSkinnable().getLedColor()) + ";");
 			ledOnGlow.setColor(getSkinnable().getLedColor());
@@ -330,22 +316,18 @@ public class LedButtonSkin extends SkinBase<LedButton> implements Skin<LedButton
 		}
 	}
 
-
 	public static String colorToCss(final Color COLOR)
 	{
 		StringBuilder cssColor = new StringBuilder();
-		cssColor.append("rgba(").append((int) (COLOR.getRed() * 255)).append(", ")
-				.append((int) (COLOR.getGreen() * 255)).append(", ").append((int) (COLOR.getBlue() * 255)).append(", ")
-				.append(COLOR.getOpacity()).append(");");
+		cssColor.append("rgba(").append((int) (COLOR.getRed() * 255)).append(", ").append((int) (COLOR.getGreen() * 255)).append(", ")
+				.append((int) (COLOR.getBlue() * 255)).append(", ").append(COLOR.getOpacity()).append(");");
 		return cssColor.toString();
 	}
-
 
 	// ******************** Resizing ******************************************
 	private void resize()
 	{
-		size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
-				: getSkinnable().getHeight();
+		size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth() : getSkinnable().getHeight();
 		if (size == 0)
 		{
 			return;

@@ -35,7 +35,7 @@ public class LedButton extends Control
 	public LedButton()
 	{
 		getStyleClass().add("tbutton");
-		ledColor = new SimpleObjectProperty<>(Color.RED);
+		ledColor = new SimpleObjectProperty<Color>(Color.RED);
 		text = new SimpleStringProperty(this, "text", "");
 		selected = new SimpleBooleanProperty(this, "selected", false);
 		final Glow glow = new Glow();
@@ -60,7 +60,6 @@ public class LedButton extends Control
 				setScaleY(1);
 			}
 		});
-		
 	}
 
 
