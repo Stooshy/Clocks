@@ -1,11 +1,13 @@
 package application.gui.segment;
 
+import application.counter.TimeCounter;
+
 public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements TimeConsumer
 {
 
 	public SevenSegmentsDisplayStopWatch()
 	{
-		super();
+		super(TimeCounter.getInstance());
 	}
 
 

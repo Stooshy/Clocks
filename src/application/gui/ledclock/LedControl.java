@@ -22,15 +22,17 @@ public class LedControl extends Control implements TimeConsumer
 	private TimeProvider timeProvider;
 	private ObjectProperty<Color> ledColor;
 	private int lastSec;
+	private int lastHour;
 	private StringProperty text;
 
 
-	public LedControl()
+	public LedControl(TimeProvider provider)
 	{
 		getStyleClass().add("ledclock");
 		setPadding(new Insets(5, 5, 5, 5));
-		ledColor = new SimpleObjectProperty<Color>(Color.GREEN);
+		ledColor = new SimpleObjectProperty<Color>(Color.SILVER);
 		text = new SimpleStringProperty(this, "text", "test");
+		setTimeProvider(provider);
 	}
 
 
@@ -82,19 +84,20 @@ public class LedControl extends Control implements TimeConsumer
 	}
 
 
-	public int getValue()
-	{
-		return multiPlexerM.getNumber();
-	}
-
-
 	public void consumeTime()
 	{
-		if (lastSec < timeProvider.getSeconds())
-			setSeconds(timeProvider.getSeconds());
-		setMinutes(timeProvider.getMinutes());
-		setHours(timeProvider.getHours());
-		lastSec = timeProvider.getSeconds();
+		int actSec = timeProvider.getSeconds();
+		if (lastSec != actSec)
+		{
+			setSeconds(actSec);
+			setMinutes(timeProvider.getMinutes());
+			lastSec = actSec;
+		}
+		if (lastHour != timeProvider.getHours())
+		{
+			setHours(timeProvider.getHours());
+			lastHour = timeProvider.getHours();
+		}
 	}
 
 
@@ -113,14 +116,13 @@ public class LedControl extends Control implements TimeConsumer
 
 	private void setHours(int value)
 	{
-		multiPlexerH.set(value);
+		multiPlexerH.set(value % 12);
 	}
 
 
 	public void setTimeProvider(TimeProvider provider)
 	{
 		this.timeProvider = provider;
-		consumeTime();
 	}
 
 

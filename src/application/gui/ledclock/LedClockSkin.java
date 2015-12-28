@@ -4,17 +4,23 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
+import javafx.scene.effect.Light.Distant;
+import javafx.scene.effect.Lighting;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -22,6 +28,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedControl>
 {
@@ -84,13 +91,19 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	{
 
 		// lines
-		for (int idx = 0; idx < 6; idx++)
+		for (int idx = 0; idx < 12; idx++)
 		{
 			Region line = new Region();
 			line.getStyleClass().setAll("line");
-			line.setRotate(-idx * 60);
-			DropShadow lineDS = new DropShadow(BlurType.TWO_PASS_BOX, Color.SILVER.darker(), 2, 0, 1, 1);
-			line.setEffect(lineDS);
+			line.setRotate(-idx * 30);
+
+			Lighting l = new Lighting();
+			Distant light = new Distant();
+			light.setAzimuth(-idx * 30);
+			l.setSurfaceScale(10.0f);
+			l.setLight(light);
+
+			line.setEffect(l);
 			pane.getChildren().add(line);
 			lines.add(line);
 		}
@@ -99,43 +112,18 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		for (int idx = 0; idx < 60; idx++)
 		{
 			Region minute = new Region();
-			minute.getStyleClass().setAll("off-led");
-			minute.setMouseTransparent(true);
-
-			InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
-			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX,
-					getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
-			ledOnGlow.setOffsetX(0.0);
-			ledOnGlow.setOffsetY(0.0);
-			ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
-			ledOnGlow.setColor(getSkinnable().getLedColor());
-			ledOnGlow.setBlurType(BlurType.TWO_PASS_BOX);
-			ledOnGlow.setInput(ledOnInnerShadow);
-			minute.setEffect(ledOnGlow);
-			if ((idx + 1) % 5 == 1)
-			{
-				minute.setStyle("-led-color: " + colorToCss(Color.RED) + ";");
-			}
+			minute.getStyleClass().setAll("on-led");
+			minute.setEffect(getLedShadow());
 			pane.getChildren().add(minute);
 			minutes.add(minute);
-
 		}
 
 		// hours
 		for (int idx = 0; idx < 12; idx++)
 		{
 			Region hour = new Region();
-			hour.getStyleClass().setAll("off-led");
-
-			InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
-			DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX,
-					getSkinnable().getLedColor().darker().darker().darker(), 20, 0, 0, 0);
-			ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
-			ledOnGlow.setColor(getSkinnable().getLedColor());
-			ledOnGlow.setBlurType(BlurType.TWO_PASS_BOX);
-			ledOnGlow.setInput(ledOnInnerShadow);
-			hour.setEffect(ledOnGlow);
-
+			hour.getStyleClass().setAll("on-led");
+			hour.setEffect(getLedShadow());
 			pane.getChildren().add(hour);
 			hours.add(hour);
 		}
@@ -147,21 +135,33 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		text.getStyleClass().add("text");
 		text.setMouseTransparent(true);
 		text.setText(getSkinnable().getSkinText());
-
 		pane.getChildren().add(text);
-		pane.setMouseTransparent(true);
-
-		InnerShadow paneInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 3, 0, -5, -5);
-		DropShadow paneDropShadow = new DropShadow(BlurType.TWO_PASS_BOX, Color.GRAY.darker().darker().darker(), 20, 0,
-				10, 10);
-		paneDropShadow.setRadius(10.0 / 250.0 * PREFERRED_WIDTH);
-		paneDropShadow.setColor(Color.GRAY.darker());
-		paneDropShadow.setBlurType(BlurType.TWO_PASS_BOX);
-		paneDropShadow.setInput(paneInnerShadow);
-		pane.setEffect(paneDropShadow);
+		pane.setEffect(getPaneShadow());
 
 		getChildren().setAll(pane);
 		resize();
+	}
+
+
+	private static DropShadow getLedShadow()
+	{
+		InnerShadow ledOnInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.65), 8, 0, 0, 0);
+		DropShadow ledOnGlow = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(240, 240, 240), 20, 0, 0, 0);
+		ledOnGlow.setRadius(9.0 / 250.0 * PREFERRED_WIDTH);
+		ledOnGlow.setBlurType(BlurType.TWO_PASS_BOX);
+		ledOnGlow.setInput(ledOnInnerShadow);
+		return ledOnGlow;
+	}
+
+
+	private static DropShadow getPaneShadow()
+	{
+		InnerShadow paneInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(50, 50, 50, 0.65), 0, 0, -5, -5);
+		DropShadow paneDropShadow = new DropShadow(BlurType.TWO_PASS_BOX, Color.GRAY.darker(), 0, 0, 5, 5);
+		paneDropShadow.setRadius(10.0 / 250.0 * PREFERRED_WIDTH);
+		paneDropShadow.setBlurType(BlurType.TWO_PASS_BOX);
+		paneDropShadow.setInput(paneInnerShadow);
+		return paneDropShadow;
 	}
 
 
@@ -170,26 +170,21 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		@SuppressWarnings("unchecked")
 		SimpleObjectProperty<BitSet> newO = (SimpleObjectProperty<BitSet>) observable;
 		BitSet set = (BitSet) newO.get();
-		for (int idx = 1; idx < minutes.size(); idx++)
+		for (int idx = 1; idx <= minutes.size(); idx++)
 		{
-
 			if (set.get(idx))
 			{
-				if ((idx + 1) % 5 == 1)
+				minutes.get(idx).getStyleClass().setAll("on-led");
+				if (idx % 5 == 0)
 				{
-					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.RED);
+					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.GREENYELLOW);
+					minutes.get(idx).setStyle("-led-color: " + colorToCss(Color.GREENYELLOW) + ";");
 				}
 				else
-					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.GREEN);
-
-				minutes.get(idx).getStyleClass().setAll("on-led");
-
-			}
-			else
-			{
-				DropShadow ef = (DropShadow) minutes.get(idx).getEffect();
-				ef.setColor(Color.SILVER);
-				minutes.get(idx).getStyleClass().setAll("off-led");
+				{
+					((DropShadow) minutes.get(idx).getEffect()).setColor(Color.RED);
+					minutes.get(idx).setStyle("-led-color: " + colorToCss(Color.RED) + ";");
+				}
 			}
 		}
 	}
@@ -207,16 +202,27 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 
 	private void handleNewSeconds(Observable observable)
 	{
-		if (minutes.get(0).getStyleClass().toString().equals("off-led"))
+
+		Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
-			((DropShadow) minutes.get(0).getEffect()).setColor(Color.RED);
-			minutes.get(0).getStyleClass().setAll("on-led");
-		}
-		else
+			@Override
+			public void handle(ActionEvent actionEvent)
+			{
+				((DropShadow) minutes.get(0).getEffect()).setColor(Color.GREENYELLOW);
+				minutes.get(0).setStyle("-led-color: " + colorToCss(Color.GREENYELLOW) + ";");
+			}
+		}), new KeyFrame(Duration.millis(500)));
+		watchLine.setOnFinished(new EventHandler<ActionEvent>()
 		{
-			((DropShadow) minutes.get(0).getEffect()).setColor(Color.SILVER);
-			minutes.get(0).getStyleClass().setAll("off-led");
-		}
+
+			@Override
+			public void handle(ActionEvent event)
+			{
+				((DropShadow) minutes.get(0).getEffect()).setColor(Color.rgb(240, 240, 240));
+				minutes.get(0).setStyle("-led-color: " + colorToCss(Color.rgb(240, 240, 240)) + ";");
+			}
+		});
+		watchLine.play();
 	}
 
 
@@ -229,13 +235,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			if (set.get(idx))
 			{
-				((DropShadow) hours.get(idx).getEffect()).setColor(Color.GREEN);
-				hours.get(idx).getStyleClass().setAll("on-led");
-			}
-			else
-			{
-				((DropShadow) hours.get(idx).getEffect()).setColor(Color.SILVER);
-				hours.get(idx).getStyleClass().setAll("off-led");
+				((DropShadow) hours.get(idx + 1).getEffect()).setColor(Color.RED);
+				hours.get(idx + 1).setStyle("-led-color: " + colorToCss(Color.RED) + ";");
 			}
 		}
 	}
@@ -270,7 +271,6 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				handleNewHours(observable);
 			}
 		});
-
 		getSkinnable().widthProperty().addListener(new InvalidationListener()
 		{
 			@Override
@@ -279,7 +279,6 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				resize();
 			}
 		});
-
 		getSkinnable().heightProperty().addListener(new InvalidationListener()
 		{
 			@Override
@@ -331,17 +330,17 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		for (Region line : lines)
 		{
 			newWidth = Math.round(0.005 * size);
-			if (idx == 1 || idx == 2 || idx == 4 || idx == 5)
+			if (idx == 0 || idx == 3 || idx == 6 || idx == 9 || idx == 12)
 			{
-				newHeigths = Math.round(0.5 * size);
-				y1 = (size - 0.675 * size) * ((Math.cos(60 * idx * Math.PI / 180)));
-				x1 = (size - 0.675 * size) * ((Math.sin(60 * idx * Math.PI / 180)));
+				newHeigths = Math.round(0.425 * size);
+				y1 = (size - 0.715 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
+				x1 = (size - 0.715 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
 			}
 			else
 			{
-				newHeigths = Math.round(0.425 * size);
-				y1 = (size - 0.715 * size) * ((Math.cos(60 * idx * Math.PI / 180)));
-				x1 = (size - 0.715 * size) * ((Math.sin(60 * idx * Math.PI / 180)));
+				newHeigths = Math.round(0.5 * size);
+				y1 = (size - 0.675 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
+				x1 = (size - 0.675 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
 			}
 			line.setTranslateX(size * 0.5 + x1 - (newWidth * 0.4));
 			line.setTranslateY(size * 0.5 + y1 - (newHeigths * 0.5));

@@ -26,7 +26,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 	/**
 	 * Hours, minutes, seconds: 00:00:00
 	 */
-	public SevenSegmentsDisplay()
+	public SevenSegmentsDisplay(TimeProvider timeProvider)
 	{
 		sp = new HBox();
 		sp.setId("clockpane");
@@ -35,6 +35,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 		sp.setPadding(new Insets(5, 5, 5, 5));
 
 		buildDisplayPane();
+		setTimeProvider(timeProvider);
 
 		sp.widthProperty().addListener(new InvalidationListener()
 		{
@@ -186,7 +187,6 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 	public void setTimeProvider(TimeProvider provider)
 	{
 		this.timeProvider = provider;
-		consumeTime();
 	}
 
 

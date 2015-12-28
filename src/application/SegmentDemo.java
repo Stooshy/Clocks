@@ -3,6 +3,8 @@ package application;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import application.counter.TimeCounter;
 import application.gui.CounterMode;
@@ -49,10 +51,9 @@ import javafx.util.Duration;
 public class SegmentDemo extends Application
 {
 	private TimeConsumer stopWatchDisplay;
-	private TimeCounter counter;
 	private LedButton showCounter;
 	private Timeline counterLine;
-	private Timeline watchLine;
+	private List<Timeline> watchLines;
 	private LedButton go;
 	private TimeConsumer watchDisplay1;
 	private TimeConsumer watchDisplay2;
@@ -66,15 +67,10 @@ public class SegmentDemo extends Application
 	@Override
 	public void init()
 	{
-		counter = TimeCounter.getInstance();
+		watchLines = new ArrayList<Timeline>();
 		stopWatchDisplay = new SevenSegmentsDisplayStopWatch();
-		stopWatchDisplay.setTimeProvider(counter);
-
-		watchDisplay1 = new SevenSegmentsDisplay();
-		watchDisplay1.setTimeProvider(LocalTimeProvider.getInstance());
-
-		watchDisplay2 = new LedControl();
-		watchDisplay2.setTimeProvider(LocalTimeProvider.getInstance());
+		watchDisplay1 = new SevenSegmentsDisplay(LocalTimeProvider.getInstance());
+		watchDisplay2 = new LedControl(LocalTimeProvider.getInstance());
 
 		mainContainer = new ScreensController();
 		mainContainer.addScreen(WATCH_SCREEN2, ((LedControl) watchDisplay2));
@@ -107,18 +103,30 @@ public class SegmentDemo extends Application
 		addMouseListeners(stage, ((LedControl) watchDisplay2), borderPane);
 
 		// ********* timelines for time and counter********
-		watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		final Timeline watchLine1 = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent actionEvent)
+			{
+				watchDisplay1.consumeTime();
+			}
+		}), new KeyFrame(Duration.millis(100)));
+
+		watchLine1.setCycleCount(Animation.INDEFINITE);
+		watchLines.add(watchLine1);
+
+		// ********* timelines for time and counter********
+		final Timeline watchLine2 = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
 				watchDisplay2.consumeTime();
-				watchDisplay1.consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(100)));
-		watchLine.setCycleCount(Animation.INDEFINITE);
-		watchLine.play();
-		
+		watchLine2.setCycleCount(Animation.INDEFINITE);
+		watchLines.add(watchLine2);
+
 		counterLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
@@ -145,7 +153,7 @@ public class SegmentDemo extends Application
 		counterLine.setCycleCount(Animation.INDEFINITE);
 
 		mainContainer.setScreen(WATCH_SCREEN);
-		setStageSize();
+		initScreen();
 		stage.show();
 
 	}
@@ -232,7 +240,7 @@ public class SegmentDemo extends Application
 				public void handle(MouseEvent mouseEvent)
 				{
 					mainContainer.setNextScreen();
-					setStageSize();
+					initScreen();
 				}
 			});
 
@@ -342,7 +350,7 @@ public class SegmentDemo extends Application
 					}
 					else
 					{
-						setStageSize();
+						initScreen();
 						resizeBtn.setSkinText("|");
 					}
 				}
@@ -390,28 +398,31 @@ public class SegmentDemo extends Application
 	}
 
 
-	private void setStageSize()
+	private void initScreen()
 	{
 		if (mainContainer.getActScreen() == WATCH_SCREEN2)
 		{
+			watchLines.get(0).pause();
+			watchLines.get(1).play();
+
 			setCurrentWidthToStage(240);
 			setCurrentHeightToStage(290);
 		}
 		else if (mainContainer.getActScreen() == COUNTER_SCREEN)
 		{
-			watchLine.pause();
+			watchLines.get(0).pause();
+			watchLines.get(1).pause();
+
 			setCurrentWidthToStage(225);
 			setCurrentHeightToStage(115);
-			if ((counterLine.getStatus() == Status.STOPPED))
-			{
-				stopWatchDisplay.consumeTime();
-			}
 		}
 		else
 		{
+			watchLines.get(1).pause();
+			watchLines.get(0).play();
+
 			setCurrentWidthToStage(225);
 			setCurrentHeightToStage(115);
-			watchLine.play();
 		}
 	}
 
