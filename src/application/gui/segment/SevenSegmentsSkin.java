@@ -1,7 +1,6 @@
 package application.gui.segment;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import javafx.beans.InvalidationListener;
@@ -130,11 +129,12 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 	private void handleNewValue(Observable observable)
 	{
 		@SuppressWarnings("unchecked")
-		SimpleObjectProperty<BitSet> newO = (SimpleObjectProperty<BitSet>) observable;
-		BitSet set = (BitSet) newO.get();
+		SimpleObjectProperty<boolean[]> newO = (SimpleObjectProperty<boolean[]>) observable;
+		boolean[] set = newO.get();
+
 		for (int idx = 0; idx < digits.size(); idx++)
 		{
-			digits.get(idx).setVisible(set.get(idx));
+			digits.get(idx).setVisible(set[idx]);
 		}
 	}
 

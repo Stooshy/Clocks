@@ -47,6 +47,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -57,12 +60,13 @@ public class ScreensController extends StackPane
 {
 
 	private HashMap<Integer, Node> screens = new HashMap<Integer, Node>();
-	private Integer actScreen;
+	private ObjectProperty<Integer> actScreen;
 
 
 	public void addScreen(int id, Node screen)
 	{
 		screens.put(id, screen);
+		actScreen = new SimpleObjectProperty<Integer>();
 	}
 
 
@@ -74,7 +78,7 @@ public class ScreensController extends StackPane
 
 	public void setNextScreen()
 	{
-		setScreen((actScreen % screens.size()) + 1);
+		setScreen((actScreen.get() % screens.size()) + 1);
 	}
 
 
@@ -117,7 +121,7 @@ public class ScreensController extends StackPane
 						new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
 			}
-			setActScreen(id);
+			setActScreenNo(id);
 			return true;
 		}
 		else
@@ -128,15 +132,33 @@ public class ScreensController extends StackPane
 	}
 
 
-	public Integer getActScreen()
+	public Integer getActScreenNo()
 	{
-		return actScreen;
+		return actScreen.get();
 	}
 
 
-	private void setActScreen(int id)
+	public void registerScreenChangedListener(ChangeListener<Integer> listener)
 	{
-		this.actScreen = id;
+		actScreen.addListener(listener);
+	}
+
+
+	private void setActScreenNo(int id)
+	{
+		this.actScreen.set(id);
+	}
+
+
+	public double getPrefHeightScreen()
+	{
+		return screens.get(getActScreenNo()).prefHeight(0);
+	}
+
+
+	public double getPrefWidthScreen()
+	{
+		return screens.get(getActScreenNo()).prefWidth(0);
 	}
 
 }

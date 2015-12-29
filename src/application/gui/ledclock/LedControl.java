@@ -1,7 +1,5 @@
 package application.gui.ledclock;
 
-import java.util.BitSet;
-
 import application.gui.TimeProvider;
 import application.gui.segment.TimeConsumer;
 import javafx.beans.InvalidationListener;
@@ -22,6 +20,7 @@ public class LedControl extends Control implements TimeConsumer
 	private TimeProvider timeProvider;
 	private ObjectProperty<Color> ledColor;
 	private int lastSec;
+	private int lastMinute;
 	private int lastHour;
 	private StringProperty text;
 
@@ -33,30 +32,28 @@ public class LedControl extends Control implements TimeConsumer
 		ledColor = new SimpleObjectProperty<Color>(Color.SILVER);
 		text = new SimpleStringProperty(this, "text", "test");
 		setTimeProvider(provider);
+		setPrefHeight(290);
+		setPrefWidth(240);
 	}
 
 
 	public void addMinutesListener(InvalidationListener toAdd)
 	{
-		multiPlexerM.getBitsProperty().addListener(toAdd);
+		multiPlexerM.getProperty().addListener(toAdd);
+		setMinutes(timeProvider.getMinutes());
 	}
 
 
-	public void addSecondsListener(InvalidationListener toAdd)
+	public void addSecondsChangedListener(ChangeListener<Integer> toAdd)
 	{
-		multiPlexerS.getBitsProperty().addListener(toAdd);
-	}
-
-
-	public void addSecondsChangedListener(ChangeListener<BitSet> toAdd)
-	{
-		multiPlexerS.getBitsProperty().addListener(toAdd);
+		multiPlexerS.getProperty().addListener(toAdd);
 	}
 
 
 	public void addHoursListener(InvalidationListener toAdd)
 	{
-		multiPlexerH.getBitsProperty().addListener(toAdd);
+		multiPlexerH.getProperty().addListener(toAdd);
+		setHours(timeProvider.getHours());
 	}
 
 
@@ -87,16 +84,22 @@ public class LedControl extends Control implements TimeConsumer
 	public void consumeTime()
 	{
 		int actSec = timeProvider.getSeconds();
+		int actMinutes = timeProvider.getMinutes();
+		int actHour = timeProvider.getHours();
 		if (lastSec != actSec)
 		{
 			setSeconds(actSec);
-			setMinutes(timeProvider.getMinutes());
 			lastSec = actSec;
 		}
-		if (lastHour != timeProvider.getHours())
+		if (lastMinute != actMinutes)
 		{
-			setHours(timeProvider.getHours());
-			lastHour = timeProvider.getHours();
+			setMinutes(actMinutes);
+			lastMinute = actMinutes;
+		}
+		if (lastHour != actHour)
+		{
+			setHours(actHour);
+			lastHour = actHour;
 		}
 	}
 
@@ -142,4 +145,5 @@ public class LedControl extends Control implements TimeConsumer
 	{
 		return ledColor;
 	}
+
 }

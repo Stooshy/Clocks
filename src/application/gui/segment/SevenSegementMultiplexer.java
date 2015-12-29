@@ -1,36 +1,34 @@
 package application.gui.segment;
 
-import java.util.BitSet;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class SevenSegementMultiplexer
 {
-	private SimpleObjectProperty<BitSet> bits;
+	private SimpleObjectProperty<boolean[]> bits;
 	private static int noOfSegments = 7;
 
 
 	public SevenSegementMultiplexer()
 	{
-		bits = new SimpleObjectProperty<BitSet>(convert(SevenDigit.ZERO.getCode()));
+		bits = new SimpleObjectProperty<boolean[]>(new boolean[noOfSegments]);
 	}
 
 
-	private static BitSet convert(long value)
+	private static boolean[] convert(int value)
 	{
-		BitSet bits = new BitSet(noOfSegments);
+		boolean[] valueBits = new boolean[noOfSegments];
 		int index = 0;
-		while (value != 0L)
+		while (value != 0)
 		{
-			if (value % 2L != 0)
+			if (value % 2 != 0)
 			{
-				bits.set(index);
+				valueBits[index] = true;
 			}
 			++index;
 			value = value >>> 1;
 		}
-		return bits;
+		return valueBits;
 	}
 
 
@@ -43,9 +41,9 @@ public class SevenSegementMultiplexer
 	private int getNumber()
 	{
 		int value = 0;
-		for (int i = 0; i < bits.get().length(); ++i)
+		for (int i = 0; i < bits.get().length; ++i)
 		{
-			value += bits.get().get(i) ? (1L << i) : 0L;
+			value += bits.get()[i] ? (1 << i) : 0;
 		}
 		return value;
 	}

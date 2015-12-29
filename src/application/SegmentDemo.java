@@ -111,7 +111,6 @@ public class SegmentDemo extends Application
 				watchDisplay1.consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(100)));
-
 		watchLine1.setCycleCount(Animation.INDEFINITE);
 		watchLines.add(watchLine1);
 
@@ -152,8 +151,33 @@ public class SegmentDemo extends Application
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 
+		mainContainer.registerScreenChangedListener(new ChangeListener<Integer>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue)
+			{
+				setCurrentWidthToStage(mainContainer.getPrefWidthScreen());
+				setCurrentHeightToStage(mainContainer.getPrefHeightScreen());
+				
+				switch (newValue)
+				{
+				case WATCH_SCREEN:
+					watchLines.get(1).pause();
+					watchLines.get(0).play();
+
+					break;
+				case COUNTER_SCREEN:
+					watchLines.get(0).pause();
+					watchLines.get(1).pause();
+					break;
+				case WATCH_SCREEN2:
+					watchLines.get(0).pause();
+					watchLines.get(1).play();
+					break;
+				}
+			}
+		});
 		mainContainer.setScreen(WATCH_SCREEN);
-		initScreen();
 		stage.show();
 
 	}
@@ -204,7 +228,7 @@ public class SegmentDemo extends Application
 					{
 						if (mouseEvent.getClickCount() == 2)
 						{
-							if (mainContainer.getActScreen().equals(COUNTER_SCREEN))
+							if (mainContainer.getActScreenNo().equals(COUNTER_SCREEN))
 							{
 								if (counterLine.getStatus() == Status.STOPPED)
 								{
@@ -240,7 +264,6 @@ public class SegmentDemo extends Application
 				public void handle(MouseEvent mouseEvent)
 				{
 					mainContainer.setNextScreen();
-					initScreen();
 				}
 			});
 
@@ -350,7 +373,8 @@ public class SegmentDemo extends Application
 					}
 					else
 					{
-						initScreen();
+						setCurrentWidthToStage(mainContainer.getPrefWidthScreen());
+						setCurrentHeightToStage(mainContainer.getPrefHeightScreen());
 						resizeBtn.setSkinText("|");
 					}
 				}
@@ -394,35 +418,6 @@ public class SegmentDemo extends Application
 			col.setHalignment(HPos.CENTER);
 			getColumnConstraints().add(col);
 
-		}
-	}
-
-
-	private void initScreen()
-	{
-		if (mainContainer.getActScreen() == WATCH_SCREEN2)
-		{
-			watchLines.get(0).pause();
-			watchLines.get(1).play();
-
-			setCurrentWidthToStage(240);
-			setCurrentHeightToStage(290);
-		}
-		else if (mainContainer.getActScreen() == COUNTER_SCREEN)
-		{
-			watchLines.get(0).pause();
-			watchLines.get(1).pause();
-
-			setCurrentWidthToStage(225);
-			setCurrentHeightToStage(115);
-		}
-		else
-		{
-			watchLines.get(1).pause();
-			watchLines.get(0).play();
-
-			setCurrentWidthToStage(225);
-			setCurrentHeightToStage(115);
 		}
 	}
 

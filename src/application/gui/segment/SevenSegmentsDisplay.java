@@ -33,7 +33,8 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 		sp.setAlignment(Pos.CENTER);
 		sp.setSpacing(5);
 		sp.setPadding(new Insets(5, 5, 5, 5));
-
+		sp.setPrefHeight(115);
+		sp.setPrefWidth(225);
 		buildDisplayPane();
 		setTimeProvider(timeProvider);
 
@@ -42,7 +43,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 			@Override
 			public void invalidated(Observable observable)
 			{
-				resize();
+				layoutPane();
 			}
 		});
 
@@ -51,13 +52,13 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 			@Override
 			public void invalidated(Observable observable)
 			{
-				resize();
+				layoutPane();
 			}
 		});
 	}
 
 
-	private void resize()
+	private void layoutPane()
 	{
 		double scaleX = sp.getWidth() / 220;
 		double scaleY = sp.getHeight() / 75;
