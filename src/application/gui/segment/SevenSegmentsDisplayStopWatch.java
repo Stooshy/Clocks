@@ -14,14 +14,14 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	@Override
 	public int getSeconds()
 	{
-		return getSegment(2).getValue() * 10 + getSegment(3).getValue();
+		return getSegment(2).getValueDisplayed() * 10 + getSegment(3).getValueDisplayed();
 	}
 
 
 	@Override
 	public int getMinutes()
 	{
-		return getSegment(0).getValue() * 10 + getSegment(1).getValue();
+		return getSegment(0).getValueDisplayed() * 10 + getSegment(1).getValueDisplayed();
 	}
 
 
@@ -55,7 +55,7 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	@Override
 	public int getMilliSeconds()
 	{
-		return getSegment(4).getValue() * 100 + getSegment(5).getValue() * 10;
+		return getSegment(4).getValueDisplayed() * 100 + getSegment(5).getValueDisplayed() * 10;
 	}
 
 

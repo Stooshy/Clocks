@@ -3,6 +3,7 @@ package application.gui.segment;
 import java.util.ArrayList;
 import java.util.List;
 
+import application.gui.ScreenNode;
 import application.gui.TimeProvider;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -16,7 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
-public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
+public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenNode
 {
 	private final List<SevenDigitsHandler> segments = new ArrayList<SevenDigitsHandler>();
 	private final HBox sp;
@@ -107,7 +108,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 	}
 
 
-	public Pane getPane()
+	public Pane getNode()
 	{
 		return sp;
 	}
@@ -131,19 +132,19 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer
 
 	public int getSeconds()
 	{
-		return getSegment(4).getValue() * 10 + getSegment(5).getValue();
+		return getSegment(4).getValueDisplayed() * 10 + getSegment(5).getValueDisplayed();
 	}
 
 
 	public int getMinutes()
 	{
-		return getSegment(2).getValue() * 10 + getSegment(3).getValue();
+		return getSegment(2).getValueDisplayed() * 10 + getSegment(3).getValueDisplayed();
 	}
 
 
 	public int getHours()
 	{
-		return getSegment(0).getValue() * 10 + getSegment(1).getValue();
+		return getSegment(0).getValueDisplayed() * 10 + getSegment(1).getValueDisplayed();
 	}
 
 

@@ -43,6 +43,7 @@ package application.gui;
 
 import java.util.HashMap;
 
+import application.TimeScreen;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -50,64 +51,75 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.event.Event;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-public class ScreensController extends StackPane
+public class ScreensController
 {
 
-	private HashMap<Integer, Node> screens = new HashMap<Integer, Node>();
-	private ObjectProperty<Integer> actScreen;
+	private HashMap<TimeScreen, Node> screens = new HashMap<TimeScreen, Node>();
+	private ObjectProperty<TimeScreen> actScreen;
+	private final StackPane sp;
 
 
-	public void addScreen(int id, Node screen)
+	public ScreensController(TimeScreen... screens)
 	{
-		screens.put(id, screen);
-		actScreen = new SimpleObjectProperty<Integer>();
+		sp = new StackPane();
+		for (TimeScreen screen : screens)
+			addScreen(screen);
 	}
 
 
-	public String getActivScreen()
+	public Node getScreenNode(TimeScreen screen)
 	{
-		return getChildren().get(0).getClass().toString();
+		for (TimeScreen key : screens.keySet())
+		{
+			if (key.equals(screen))
+				return key.getNode();
+		}
+		throw new IllegalArgumentException("screen not found");
+	}
+
+
+	public void addScreen(TimeScreen screenId)
+	{
+		screens.put(screenId, screenId.getNode());
+		actScreen = new SimpleObjectProperty<TimeScreen>();
 	}
 
 
 	public void setNextScreen()
 	{
-		setScreen((actScreen.get() % screens.size()) + 1);
+		setScreen(actScreen.get().nextScreen());
 	}
 
 
-	@SuppressWarnings(
-	{
-			"unchecked", "rawtypes"
-	})
-	public boolean setScreen(final int id)
+	public boolean setScreen(final TimeScreen id)
 	{
 		if (screens.get(id) != null)
 		{ // screen loaded
-			final DoubleProperty opacity = opacityProperty();
+			final DoubleProperty opacity = sp.opacityProperty();
 
-			if (!getChildren().isEmpty())
+			if (!sp.getChildren().isEmpty())
 			{
 				Timeline fade = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
 						new KeyFrame(new Duration(500),
 
-								new EventHandler()
+								new EventHandler<ActionEvent>()
 								{
 									@Override
-									public void handle(Event t)
+									public void handle(ActionEvent event)
 									{
-										getChildren().remove(0);
-										getChildren().add(0, screens.get(id));
+										sp.getChildren().remove(0);
+										sp.getChildren().add(0, screens.get(id));
 										Timeline fadeIn = new Timeline(
 												new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
 												new KeyFrame(new Duration(200), new KeyValue(opacity, 1.0)));
 										fadeIn.play();
+
 									}
 								}, new KeyValue(opacity, 0.0)));
 				fade.play();
@@ -115,13 +127,13 @@ public class ScreensController extends StackPane
 			else
 			{
 				// no one else been displayed, then just show
-				setOpacity(0.0);
-				getChildren().add(screens.get(id));
+				sp.setOpacity(0.0);
+				sp.getChildren().add(screens.get(id));
 				Timeline fadeIn = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
 						new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
 			}
-			setActScreenNo(id);
+			this.actScreen.set(id);
 			return true;
 		}
 		else
@@ -132,33 +144,33 @@ public class ScreensController extends StackPane
 	}
 
 
-	public Integer getActScreenNo()
+	public TimeScreen getScreen()
 	{
 		return actScreen.get();
 	}
 
 
-	public void registerScreenChangedListener(ChangeListener<Integer> listener)
+	public void registerScreenChangedListener(ChangeListener<TimeScreen> listener)
 	{
 		actScreen.addListener(listener);
 	}
 
 
-	private void setActScreenNo(int id)
+	public double getPrefHeights()
 	{
-		this.actScreen.set(id);
+		return screens.get(getScreen()).prefHeight(0);
 	}
 
 
-	public double getPrefHeightScreen()
+	public double getPrefWidth()
 	{
-		return screens.get(getActScreenNo()).prefHeight(0);
+		return screens.get(getScreen()).prefWidth(0);
 	}
 
 
-	public double getPrefWidthScreen()
+	public Node getPane()
 	{
-		return screens.get(getActScreenNo()).prefWidth(0);
+		return sp;
 	}
 
 }

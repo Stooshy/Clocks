@@ -38,25 +38,35 @@ public class SevenSegementMultiplexer
 	}
 
 
-	private int getNumber()
+	private int getCode()
 	{
 		int value = 0;
 		for (int i = 0; i < bits.get().length; ++i)
 		{
 			value += bits.get()[i] ? (1 << i) : 0;
 		}
-		return value;
-	}
-
-
-	public SevenDigit getDigit()
-	{
-		return SevenDigit.findDigit(getNumber());
+		return (value == 0) ? 0 : SevenDigit.findDigit(value).getCode();
 	}
 
 
 	public void addListener(InvalidationListener toAdd)
 	{
 		bits.addListener(toAdd);
+	}
+
+
+	public SevenDigit getSevenDigit()
+	{
+		int code = getCode();
+		if (code != 0)
+			return SevenDigit.findDigit(code);
+		else
+			return SevenDigit.ZERO;
+	}
+
+
+	public SevenDigit getNextNumber()
+	{
+		return getSevenDigit().nextNumber(true);
 	}
 }

@@ -1,20 +1,17 @@
 package application;
 
+import static application.TimeScreen.COUNTER_SCREEN;
+import static application.TimeScreen.WATCH_SCREEN1;
+import static application.TimeScreen.WATCH_SCREEN2;
+
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import application.counter.TimeCounter;
 import application.gui.CounterMode;
 import application.gui.ScreensController;
-import application.gui.TimeProvider;
 import application.gui.ledbutton.LedButton;
-import application.gui.ledclock.LedControl;
-import application.gui.segment.SevenSegmentsDisplay;
-import application.gui.segment.SevenSegmentsDisplayStopWatch;
-import application.gui.segment.TimeConsumer;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
@@ -50,16 +47,10 @@ import javafx.util.Duration;
 
 public class SegmentDemo extends Application
 {
-	private TimeConsumer stopWatchDisplay;
-	private LedButton showCounter;
 	private Timeline counterLine;
-	private List<Timeline> watchLines;
+	private Timeline watchLine;
+	private LedButton showCounter;
 	private LedButton go;
-	private TimeConsumer watchDisplay1;
-	private TimeConsumer watchDisplay2;
-	public static final int WATCH_SCREEN = 1;
-	public static final int WATCH_SCREEN2 = 2;
-	public static final int COUNTER_SCREEN = 3;
 	private ScreensController mainContainer;
 	private Stage stage;
 
@@ -67,64 +58,15 @@ public class SegmentDemo extends Application
 	@Override
 	public void init()
 	{
-		watchLines = new ArrayList<Timeline>();
-		stopWatchDisplay = new SevenSegmentsDisplayStopWatch();
-		watchDisplay1 = new SevenSegmentsDisplay(LocalTimeProvider.getInstance());
-		watchDisplay2 = new LedControl(LocalTimeProvider.getInstance());
-
-		mainContainer = new ScreensController();
-		mainContainer.addScreen(WATCH_SCREEN2, ((LedControl) watchDisplay2));
-		mainContainer.addScreen(WATCH_SCREEN, ((SevenSegmentsDisplay) watchDisplay1).getPane());
-		mainContainer.addScreen(COUNTER_SCREEN, ((SevenSegmentsDisplay) stopWatchDisplay).getPane());
-	}
-
-
-	@Override
-	public void start(Stage stage)
-	{
-		this.stage = stage;
-		stage.initStyle(StageStyle.TRANSPARENT);
-		stage.setAlwaysOnTop(true);
-		stage.getIcons().add(new Image("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/logo.png"));
-		stage.setTitle("7 Segments");
-
-		final BorderPane borderPane = new BorderPane();
-		borderPane.setId("ROOTNODE");
-		borderPane.setTop(new Buttons());
-		borderPane.setCenter(mainContainer);
-		Scene scene = new Scene(borderPane, 200, 260);
-		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
-		scene.setFill(Color.TRANSPARENT);
-		stage.setScene(scene);
-		stage.setResizable(true);
-		stage.setMaxHeight(945);
-		stage.setMaxWidth(900);
-
-		addMouseListeners(stage, ((LedControl) watchDisplay2), borderPane);
-
-		// ********* timelines for time and counter********
-		final Timeline watchLine1 = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent actionEvent)
 			{
-				watchDisplay1.consumeTime();
+				mainContainer.getScreen().consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(100)));
-		watchLine1.setCycleCount(Animation.INDEFINITE);
-		watchLines.add(watchLine1);
-
-		// ********* timelines for time and counter********
-		final Timeline watchLine2 = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
-		{
-			@Override
-			public void handle(ActionEvent actionEvent)
-			{
-				watchDisplay2.consumeTime();
-			}
-		}), new KeyFrame(Duration.millis(100)));
-		watchLine2.setCycleCount(Animation.INDEFINITE);
-		watchLines.add(watchLine2);
+		watchLine.setCycleCount(Animation.INDEFINITE);
 
 		counterLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
 		{
@@ -146,52 +88,76 @@ public class SegmentDemo extends Application
 						e.printStackTrace();
 					}
 				}
-				stopWatchDisplay.consumeTime();
+				mainContainer.getScreen().consumeTime();
 			}
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 
-		mainContainer.registerScreenChangedListener(new ChangeListener<Integer>()
+		mainContainer = new ScreensController(WATCH_SCREEN1, WATCH_SCREEN2, COUNTER_SCREEN);
+		mainContainer.setScreen(WATCH_SCREEN1);
+		mainContainer.registerScreenChangedListener(new ChangeListener<TimeScreen>()
 		{
 			@Override
-			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue)
+			public void changed(ObservableValue<? extends TimeScreen> observable, TimeScreen oldValue,
+					TimeScreen newValue)
 			{
-				setCurrentWidthToStage(mainContainer.getPrefWidthScreen());
-				setCurrentHeightToStage(mainContainer.getPrefHeightScreen());
-				
+				setCurrentWidthToStage(mainContainer.getPrefWidth());
+				setCurrentHeightToStage(mainContainer.getPrefHeights());
+
 				switch (newValue)
 				{
-				case WATCH_SCREEN:
-					watchLines.get(1).pause();
-					watchLines.get(0).play();
-
+				case WATCH_SCREEN1:
+				case WATCH_SCREEN2:
+					watchLine.play();
 					break;
 				case COUNTER_SCREEN:
-					watchLines.get(0).pause();
-					watchLines.get(1).pause();
-					break;
-				case WATCH_SCREEN2:
-					watchLines.get(0).pause();
-					watchLines.get(1).play();
+					watchLine.pause();
 					break;
 				}
 			}
 		});
-		mainContainer.setScreen(WATCH_SCREEN);
+	}
+
+
+	@Override
+	public void start(Stage stage)
+	{
+		this.stage = stage;
+		stage.initStyle(StageStyle.TRANSPARENT);
+		stage.setAlwaysOnTop(true);
+		stage.getIcons().add(new Image("file:///" + new File("").getAbsolutePath().replace('\\', '/') + "/logo.png"));
+		stage.setTitle("7 Segments");
+
+		final BorderPane borderPane = new BorderPane();
+		borderPane.setId("ROOTNODE");
+		borderPane.setTop(new Buttons());
+		borderPane.setCenter(mainContainer.getPane());
+		Scene scene = new Scene(borderPane, 200, 260);
+		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
+		scene.setFill(Color.TRANSPARENT);
+		stage.setScene(scene);
+		stage.setMaxHeight(1024);
+		stage.setMaxWidth(1024);
+		stage.setHeight(mainContainer.getPrefHeights());
+		stage.setWidth(mainContainer.getPrefWidth());
+
+		addMouseListeners(stage, mainContainer.getScreenNode(WATCH_SCREEN1), mainContainer.getScreenNode(WATCH_SCREEN2),
+				mainContainer.getScreenNode(TimeScreen.COUNTER_SCREEN), borderPane);
+
 		stage.show();
 
 	}
 
 
-	private void setCurrentWidthToStage(double number2)
+	private void setCurrentWidthToStage(double width)
 	{
-		stage.setWidth(number2);
+		stage.setWidth(width);
 	}
 
 
-	private void setCurrentHeightToStage(double number2)
+	private void setCurrentHeightToStage(double heigths)
 	{
-		stage.setHeight(number2);
+		stage.setHeight(heigths);
 	}
 
 
@@ -228,12 +194,12 @@ public class SegmentDemo extends Application
 					{
 						if (mouseEvent.getClickCount() == 2)
 						{
-							if (mainContainer.getActScreenNo().equals(COUNTER_SCREEN))
+							if (mainContainer.getScreen().equals(COUNTER_SCREEN))
 							{
 								if (counterLine.getStatus() == Status.STOPPED)
 								{
 									TimeCounter.reset();
-									stopWatchDisplay.consumeTime();
+									mainContainer.getScreen().consumeTime();
 								}
 							}
 						}
@@ -279,12 +245,15 @@ public class SegmentDemo extends Application
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
 				{
+					if (!mainContainer.getScreen().equals(COUNTER_SCREEN))
+						mainContainer.setScreen(COUNTER_SCREEN);
+
 					if (counterLine.getStatus() == Status.STOPPED)
 					{
-						TimeCounter.set(((TimeProvider) stopWatchDisplay).getMinutes(),
-								((TimeProvider) stopWatchDisplay).getSeconds(),
-								((TimeProvider) stopWatchDisplay).getMilliSeconds());
-						stopWatchDisplay.setTimeProvider(TimeCounter.getInstance());
+						TimeCounter.set(mainContainer.getScreen().getMinutes(), mainContainer.getScreen().getSeconds(),
+								mainContainer.getScreen().getMilliSeconds());
+
+						mainContainer.getScreen().setTimeProvider(TimeCounter.getInstance());
 						SegmentDemo.this.counterLine.play();
 					}
 					else if (counterLine.getStatus() == Status.RUNNING)
@@ -373,8 +342,8 @@ public class SegmentDemo extends Application
 					}
 					else
 					{
-						setCurrentWidthToStage(mainContainer.getPrefWidthScreen());
-						setCurrentHeightToStage(mainContainer.getPrefHeightScreen());
+						setCurrentWidthToStage(mainContainer.getPrefWidth());
+						setCurrentHeightToStage(mainContainer.getPrefHeights());
 						resizeBtn.setSkinText("|");
 					}
 				}

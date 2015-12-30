@@ -1,5 +1,6 @@
 package application.gui.ledclock;
 
+import application.gui.ScreenNode;
 import application.gui.TimeProvider;
 import application.gui.segment.TimeConsumer;
 import javafx.beans.InvalidationListener;
@@ -9,10 +10,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.paint.Color;
 
-public class LedControl extends Control implements TimeConsumer
+public class LedControl extends Control implements TimeConsumer, ScreenNode
 {
 	private LedClockMultiplexer multiPlexerM = new LedClockMultiplexer(60);
 	private LedClockMultiplexer multiPlexerS = new LedClockMultiplexer(60);
@@ -144,6 +146,13 @@ public class LedControl extends Control implements TimeConsumer
 	public final ObjectProperty<Color> ledColorProperty()
 	{
 		return ledColor;
+	}
+
+
+	@Override
+	public Node getNode()
+	{
+		return this;
 	}
 
 }

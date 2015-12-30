@@ -35,13 +35,13 @@ public final class SevenSegmentsControl extends Control implements SevenDigitsHa
 
 	public void count(boolean up)
 	{
-		set(multiPlexer.getDigit().nextNumber(up));
+		set(multiPlexer.getNextNumber());
 	}
 
 
-	public int getValue()
+	public int getValueDisplayed()
 	{
-		return multiPlexer.getDigit().ordinal();
+		return multiPlexer.getSevenDigit().ordinal();
 	}
 
 }

@@ -20,5 +20,5 @@ public interface SevenDigitsHandler
 	/**
 	 * @return Displayed value
 	 */
-	public int getValue();
+	public int getValueDisplayed();
 }
