@@ -122,7 +122,7 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 				PREFERRED_HEIGHT - Segment.defSegmentHeigths - Segment.defRotSegmentHeights, true); // g
 		pane.getStyleClass().setAll("pane");
 		getChildren().setAll(pane);
-		resize();
+		layout();
 	}
 
 
@@ -156,7 +156,7 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 			@Override
 			public void invalidated(Observable observable)
 			{
-				resize();
+				layout();
 			}
 		});
 
@@ -165,13 +165,13 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 			@Override
 			public void invalidated(Observable observable)
 			{
-				resize();
+				layout();
 			}
 		});
 	}
 
 
-	protected void resize()
+	protected void layout()
 	{
 		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
 				: getSkinnable().getHeight();

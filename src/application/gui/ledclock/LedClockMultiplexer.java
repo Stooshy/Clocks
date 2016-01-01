@@ -7,7 +7,7 @@ public class LedClockMultiplexer
 	private final SimpleObjectProperty<Integer> valueProperty;
 
 
-	public LedClockMultiplexer(int noOfSegments)
+	public LedClockMultiplexer()
 	{
 		valueProperty = new SimpleObjectProperty<Integer>();
 	}

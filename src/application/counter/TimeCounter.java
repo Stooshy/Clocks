@@ -81,7 +81,6 @@ public class TimeCounter implements TimeProvider
 
 		if (actMilliSeconds < (999 - LocalTimeProvider.getInstance().getMilliSeconds()))
 		{
-			actSeconds--;
 			if (actSeconds == 0)
 			{
 				if (actMinutes > 0)
@@ -90,6 +89,8 @@ public class TimeCounter implements TimeProvider
 					actSeconds = 59;
 				}
 			}
+			else
+				actSeconds--;
 		}
 		actMilliSeconds = 999 - LocalTimeProvider.getInstance().getMilliSeconds();
 		return true;

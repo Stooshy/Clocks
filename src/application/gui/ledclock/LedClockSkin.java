@@ -15,14 +15,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
-import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.Light.Distant;
 import javafx.scene.effect.Lighting;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -136,21 +133,9 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		text.setMouseTransparent(true);
 		text.setText(getSkinnable().getSkinText());
 		pane.getChildren().add(text);
-		pane.setEffect(getPaneShadow());
 
 		getChildren().setAll(pane);
 		layout();
-	}
-
-
-	private static DropShadow getPaneShadow()
-	{
-		InnerShadow paneInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(50, 50, 50, 0.65), 0, 0, -5, -5);
-		DropShadow paneDropShadow = new DropShadow(BlurType.TWO_PASS_BOX, Color.GRAY.darker(), 0, 0, 5, 5);
-		paneDropShadow.setRadius(10.0 / 250.0 * PREFERRED_WIDTH);
-		paneDropShadow.setBlurType(BlurType.TWO_PASS_BOX);
-		paneDropShadow.setInput(paneInnerShadow);
-		return paneDropShadow;
 	}
 
 
@@ -345,8 +330,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		}
 		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 10.0 / 144 * size);
 		text.setFont(font);
-		double textWidth = com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(text.getText(),
-				text.getFont());
+		double textWidth = text.getLayoutBounds().getWidth();
 
 		if (text.getLayoutBounds().getWidth() > 0.78 * size)
 		{

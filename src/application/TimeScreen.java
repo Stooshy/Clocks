@@ -3,6 +3,7 @@ package application;
 import application.gui.ScreenNode;
 import application.gui.TimeProvider;
 import application.gui.ledclock.LedControl;
+import application.gui.ledmatrix.LedMatrixControl;
 import application.gui.segment.SevenSegmentsDisplay;
 import application.gui.segment.SevenSegmentsDisplayStopWatch;
 import application.gui.segment.TimeConsumer;
@@ -13,7 +14,8 @@ public enum TimeScreen implements TimeProvider,TimeConsumer
 	//@formatter:off
 	COUNTER_SCREEN(new SevenSegmentsDisplayStopWatch()),
 	WATCH_SCREEN1(new SevenSegmentsDisplay(LocalTimeProvider.getInstance())),
-	WATCH_SCREEN2(new LedControl(LocalTimeProvider.getInstance()));
+	WATCH_SCREEN2(new LedControl(LocalTimeProvider.getInstance())),
+	WATCH_SCREEN3(new LedMatrixControl(LocalTimeProvider.getInstance()));
 	//@formatter:on
 
 	protected final ScreenNode consumer;

@@ -93,8 +93,8 @@ public class SegmentDemo extends Application
 		}), new KeyFrame(Duration.millis(20)));
 		counterLine.setCycleCount(Animation.INDEFINITE);
 
-		mainContainer = new ScreensController(WATCH_SCREEN1, WATCH_SCREEN2, COUNTER_SCREEN);
-		mainContainer.setScreen(WATCH_SCREEN1);
+		mainContainer = new ScreensController(WATCH_SCREEN1, WATCH_SCREEN2, TimeScreen.WATCH_SCREEN3, COUNTER_SCREEN);
+		mainContainer.setScreen(TimeScreen.WATCH_SCREEN3);
 		mainContainer.registerScreenChangedListener(new ChangeListener<TimeScreen>()
 		{
 			@Override
@@ -108,14 +108,18 @@ public class SegmentDemo extends Application
 				{
 				case WATCH_SCREEN1:
 				case WATCH_SCREEN2:
+				case WATCH_SCREEN3:
 					watchLine.play();
 					break;
 				case COUNTER_SCREEN:
 					watchLine.pause();
 					break;
+				default:
+					break;
 				}
 			}
 		});
+		watchLine.play();
 	}
 
 
@@ -132,7 +136,7 @@ public class SegmentDemo extends Application
 		borderPane.setId("ROOTNODE");
 		borderPane.setTop(new Buttons());
 		borderPane.setCenter(mainContainer.getPane());
-		Scene scene = new Scene(borderPane, 200, 260);
+		Scene scene = new Scene(borderPane, 0, 0);
 		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
@@ -142,7 +146,8 @@ public class SegmentDemo extends Application
 		stage.setWidth(mainContainer.getPrefWidth());
 
 		addMouseListeners(stage, mainContainer.getScreenNode(WATCH_SCREEN1), mainContainer.getScreenNode(WATCH_SCREEN2),
-				mainContainer.getScreenNode(TimeScreen.COUNTER_SCREEN), borderPane);
+				mainContainer.getScreenNode(TimeScreen.WATCH_SCREEN3), mainContainer.getScreenNode(TimeScreen.COUNTER_SCREEN),
+				borderPane);
 
 		stage.show();
 

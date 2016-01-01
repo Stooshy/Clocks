@@ -16,9 +16,9 @@ import javafx.scene.paint.Color;
 
 public class LedControl extends Control implements TimeConsumer, ScreenNode
 {
-	private LedClockMultiplexer multiPlexerM = new LedClockMultiplexer(60);
-	private LedClockMultiplexer multiPlexerS = new LedClockMultiplexer(60);
-	private LedClockMultiplexer multiPlexerH = new LedClockMultiplexer(12);
+	private LedClockMultiplexer multiPlexerM = new LedClockMultiplexer();
+	private LedClockMultiplexer multiPlexerS = new LedClockMultiplexer();
+	private LedClockMultiplexer multiPlexerH = new LedClockMultiplexer();
 	private TimeProvider timeProvider;
 	private ObjectProperty<Color> ledColor;
 	private int lastSec;
