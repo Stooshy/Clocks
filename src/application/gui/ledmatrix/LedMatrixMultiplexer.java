@@ -10,13 +10,13 @@ public class LedMatrixMultiplexer
 
 	public LedMatrixMultiplexer()
 	{
-		bits = new SimpleObjectProperty<boolean[][]>(new boolean[16][16]);
+		bits = new SimpleObjectProperty<boolean[][]>(new boolean[8][8]);
 	}
 
 
-	private static boolean[][] convert(int[] values)
+	private static boolean[][] convert(byte[] values)
 	{
-		boolean[][] valueBits = new boolean[16][16];
+		boolean[][] valueBits = new boolean[8][8];
 		int row = 0;
 		int col = 0;
 		for (int value : values)
@@ -25,7 +25,7 @@ public class LedMatrixMultiplexer
 			{
 				if (value % 2 != 0)
 				{
-					valueBits[row][col] = true;
+					valueBits[col][row] = true;
 				}
 				++col;
 				value = value >>> 1;
@@ -37,9 +37,24 @@ public class LedMatrixMultiplexer
 	}
 
 
-	public void set(MatrixValues value)
+	public void set(MatrixValues... values)
 	{
-		bits.set(convert(value.getCode()));
+		boolean[][] result = new boolean[8][values.length * 8];
+		int offset = 0;
+		for (MatrixValues value : values)
+		{
+			boolean[][] first = convert(value.getCode());
+
+			for (int row = 0; row < 8; row++)
+			{
+				for (int col = 0; col < first[0].length; col++)
+				{
+					result[row][col + offset] = first[row][col];
+				}
+			}
+			offset = offset + 8;
+		}
+		bits.set(result);
 	}
 
 

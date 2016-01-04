@@ -34,8 +34,8 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 		sp.setAlignment(Pos.CENTER);
 		sp.setSpacing(5);
 		sp.setPadding(new Insets(5, 5, 5, 5));
-		sp.setPrefHeight(115);
-		sp.setPrefWidth(225);
+		sp.setPrefHeight(SevenSegmentsSkin.PREFERRED_HEIGHT);
+		sp.setPrefWidth(SevenSegmentsSkin.PREFERRED_WIDTH * 4);
 		buildDisplayPane();
 		setTimeProvider(timeProvider);
 

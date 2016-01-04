@@ -146,8 +146,8 @@ public class SegmentDemo extends Application
 		stage.setWidth(mainContainer.getPrefWidth());
 
 		addMouseListeners(stage, mainContainer.getScreenNode(WATCH_SCREEN1), mainContainer.getScreenNode(WATCH_SCREEN2),
-				mainContainer.getScreenNode(TimeScreen.WATCH_SCREEN3), mainContainer.getScreenNode(TimeScreen.COUNTER_SCREEN),
-				borderPane);
+				mainContainer.getScreenNode(TimeScreen.WATCH_SCREEN3),
+				mainContainer.getScreenNode(TimeScreen.COUNTER_SCREEN), borderPane);
 
 		stage.show();
 
@@ -341,8 +341,8 @@ public class SegmentDemo extends Application
 				{
 					if (newValue)
 					{
-						setCurrentHeightToStage(stage.getMaxHeight());
-						setCurrentWidthToStage(stage.getMaxWidth());
+						setCurrentHeightToStage(mainContainer.getMaxHeight());
+						setCurrentWidthToStage(mainContainer.getMaxWidth());
 						resizeBtn.setSkinText("o");
 					}
 					else

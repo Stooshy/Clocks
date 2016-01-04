@@ -24,10 +24,10 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 {
 	public static final double MINIMUM_WIDTH = 10;
 	public static final double MINIMUM_HEIGHT = 10;
-	public static final double MAXIMUM_WIDTH = Segment.rotSegmentWidth + Segment.segmentWidth;
-	public static final double MAXIMUM_HEIGHT = Segment.segmentHeigths * 2 + Segment.rotSegmentHeights;
 	public static final double PREFERRED_WIDTH = Segment.rotSegmentWidth + Segment.segmentWidth;
 	public static final double PREFERRED_HEIGHT = Segment.segmentHeigths * 2 + Segment.rotSegmentHeights;
+	public static final double MAXIMUM_WIDTH = PREFERRED_WIDTH;
+	public static final double MAXIMUM_HEIGHT = PREFERRED_HEIGHT;
 	private final Pane pane = new Pane();
 	protected final List<Segment> digits = new ArrayList<Segment>();
 

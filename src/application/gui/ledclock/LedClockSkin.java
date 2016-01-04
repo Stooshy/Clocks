@@ -13,6 +13,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
+import javafx.scene.CacheHint;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
 import javafx.scene.effect.DropShadow;
@@ -112,6 +113,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			Region minute = new Region();
 			minute.getStyleClass().setAll("on-led");
+			minute.setCache(true);
+			minute.setCacheHint(CacheHint.SPEED);
 			pane.getChildren().add(minute);
 			minutes.add(minute);
 		}
@@ -121,6 +124,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			Region hour = new Region();
 			hour.getStyleClass().setAll("on-led");
+			hour.setCache(true);
+			hour.setCacheHint(CacheHint.SPEED);
 			pane.getChildren().add(hour);
 			hours.add(hour);
 		}

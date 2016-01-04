@@ -2,67 +2,80 @@ package application.gui.ledmatrix;
 
 public enum MatrixValues
 {
-	ZERO(new int[]
+	ZERO(new byte[]
+	{
+			0x00, 0x3E, 0x41, 0x41, 0x41, 0x3E, 0x00, 0x00
+	}), ONE(new byte[]
+	{
+			0x00, 0x08, 0x10, 0x20, 0x7F, 0x00, 0x00, 0x00
+	}), TWO(new byte[]
+	{
+			0x00, 0x21, 0x43, 0x45, 0x49, 0x31, 0x00, 0x00
+	}), THREE(new byte[]
+	{
+			0x00, 0x22, 0x41, 0x49, 0x49, 0x36, 0x00, 0x00
+	}), FOUR(new byte[]
+	{
+			0x00, 0x0C, 0x14, 0x24, 0x7F, 0x04, 0x00, 0x00
+	}), FIVE(new byte[]
+	{
+			0x00, 0x7A, 0x49, 0x49, 0x49, 0x46, 0x00, 0x00
+	}), SIX(new byte[]
+	{
+			0x00, 0x1E, 0x25, 0x49, 0x49, 0x06, 0x00, 0x00
+	}), SEVEN(new byte[]
+	{
+			0x00, 0x40, 0x47, 0x48, 0x50, 0x60, 0x00, 0x00
+	}), EIGHT(new byte[]
+	{
+			0x00, 0x36, 0x49, 0x49, 0x49, 0x36, 0x00, 0x00
+	}), NINE(new byte[]
+	{
+			0x00, 0x32, 0x49, 0x49, 0x49, 0x3E, 0x00, 0x00
+	}), A(new byte[]
+	{
+			0x00, 0x3F, 0x44, 0x44, 0x44, 0x3F, 0x00, 0x00
+	}), B(new byte[]
+	{
+			0x00, 0x7F, 0x49, 0x49, 0x49, 0x36, 0x00, 0x00
+	}), C(new byte[]
 	{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), ONE(new int[]
+	}), D(new byte[]
 	{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), TWO(new int[]
+	}), E(new byte[]
 	{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), THREE(new int[]
+	}), e(new byte[]
 	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), FOUR(new int[]
+			0x00, 0x0E, 0x11, 0x15, 0x15, 0x08, 0x00, 0x00
+	}), DOULEPOINT(new byte[]
 	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), FIVE(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), SIX(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), SEVEN(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), EIGHT(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), NINE(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), A(new int[]
-	{
-			384, 384, 576, 576, 1056, 1056, 2064, 2064, 4104, 8184, 16380, 8196, 16386, 16386, 32769, 32769
-	}), B(new int[]
-	{
-			384, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), C(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), D(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), E(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	}), F(new int[]
-	{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+			0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00
 	});
 
-	private int[] code = new int[16];
+	private byte[] code = new byte[8];
 
 
-	private MatrixValues(int[] theCode)
+	private MatrixValues(byte[] theCode)
 	{
 		code = theCode;
 	}
 
 
-	public int[] getCode()
+	public byte[] getCode()
 	{
 		return code;
+	}
+
+
+	public static MatrixValues findDigit(int code)
+	{
+		for (MatrixValues num : values())
+			if (num.ordinal() == code)
+				return num;
+
+		throw new IllegalArgumentException("Code not valid.");
 	}
 }

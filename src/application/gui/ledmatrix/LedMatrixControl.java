@@ -22,9 +22,9 @@ public class LedMatrixControl extends Control implements TimeConsumer, ScreenNod
 	{
 		getStyleClass().add("ledmatrixskin");
 		setTimeProvider(provider);
-		text = new SimpleStringProperty(this, "text", "test");
-		setPrefHeight(115);
-		setPrefWidth(236);
+		text = new SimpleStringProperty(this, "text", "");
+		setPrefHeight(90);
+		setPrefWidth(265);
 	}
 
 
@@ -38,8 +38,12 @@ public class LedMatrixControl extends Control implements TimeConsumer, ScreenNod
 	@Override
 	public void consumeTime()
 	{
-		text.set(String.format("%02d:%02d:%02d", timeProvider.getHours(), timeProvider.getMinutes(),
-				timeProvider.getSeconds()));
+		int sec = timeProvider.getSeconds();
+		int min = timeProvider.getMinutes();
+		int h = timeProvider.getHours();
+		multiPlexerM.set(MatrixValues.findDigit((h / 10) % 10), MatrixValues.findDigit(h % 10), MatrixValues.DOULEPOINT,
+				MatrixValues.findDigit((min / 10) % 10), MatrixValues.findDigit(min % 10), MatrixValues.DOULEPOINT,
+				MatrixValues.findDigit((sec / 10) % 10), MatrixValues.findDigit(sec % 10));
 	}
 
 

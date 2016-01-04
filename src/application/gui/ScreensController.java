@@ -117,7 +117,7 @@ public class ScreensController
 										sp.getChildren().add(0, screens.get(id));
 										Timeline fadeIn = new Timeline(
 												new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-												new KeyFrame(new Duration(200), new KeyValue(opacity, 1.0)));
+												new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
 										fadeIn.play();
 
 									}
@@ -171,6 +171,18 @@ public class ScreensController
 	public Node getPane()
 	{
 		return sp;
+	}
+
+
+	public double getMaxHeight()
+	{
+		return screens.get(getScreen()).maxHeight(0);
+	}
+
+
+	public double getMaxWidth()
+	{
+		return screens.get(getScreen()).maxWidth(0);
 	}
 
 }
