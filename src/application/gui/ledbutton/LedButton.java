@@ -66,7 +66,7 @@ public class LedButton extends Control
 	@Override
 	public String getUserAgentStylesheet()
 	{
-		return getClass().getResource("/application/7segmentdemo.css").toExternalForm();
+		return getClass().getResource("/application/clocks.css").toExternalForm();
 	}
 
 

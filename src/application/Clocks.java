@@ -45,7 +45,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-public class SegmentDemo extends Application
+public class Clocks extends Application
 {
 	private Timeline counterLine;
 	private Timeline watchLine;
@@ -137,7 +137,7 @@ public class SegmentDemo extends Application
 		borderPane.setTop(new Buttons());
 		borderPane.setCenter(mainContainer.getPane());
 		Scene scene = new Scene(borderPane, 0, 0);
-		scene.getStylesheets().add(getClass().getResource("7segmentdemo.css").toExternalForm());
+		scene.getStylesheets().add(getClass().getResource("clocks.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setScene(scene);
 		stage.setMaxHeight(1024);
@@ -259,19 +259,19 @@ public class SegmentDemo extends Application
 								mainContainer.getScreen().getMilliSeconds());
 
 						mainContainer.getScreen().setTimeProvider(TimeCounter.getInstance());
-						SegmentDemo.this.counterLine.play();
+						Clocks.this.counterLine.play();
 					}
 					else if (counterLine.getStatus() == Status.RUNNING)
 					{
-						SegmentDemo.this.counterLine.pause();
+						Clocks.this.counterLine.pause();
 					}
 					else if (counterLine.getStatus() == Status.PAUSED)
 					{
-						SegmentDemo.this.counterLine.play();
+						Clocks.this.counterLine.play();
 					}
 
 					if (!newValue)
-						SegmentDemo.this.counterLine.stop();
+						Clocks.this.counterLine.stop();
 				}
 			});
 
