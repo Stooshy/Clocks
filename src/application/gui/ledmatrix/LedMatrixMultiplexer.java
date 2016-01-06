@@ -43,13 +43,13 @@ public class LedMatrixMultiplexer
 		int offset = 0;
 		for (MatrixValues value : values)
 		{
-			boolean[][] first = convert(value.getCode());
+			boolean[][] matrixCode = convert(value.getCode());
 
 			for (int row = 0; row < 8; row++)
 			{
-				for (int col = 0; col < first[0].length; col++)
+				for (int col = 0; col < matrixCode[0].length; col++)
 				{
-					result[row][col + offset] = first[row][col];
+					result[row][col + offset] = matrixCode[row][col];
 				}
 			}
 			offset = offset + 8;

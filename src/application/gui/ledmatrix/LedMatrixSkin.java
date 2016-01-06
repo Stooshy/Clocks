@@ -8,7 +8,6 @@ import javafx.beans.Observable;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
@@ -16,17 +15,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<LedMatrixControl>
 {
 	public static final double MINIMUM_WIDTH = 10;
 	public static final double MINIMUM_HEIGHT = 10;
-	public static final double PREFERRED_WIDTH = 300;
+	public static final double PREFERRED_WIDTH = 256;
 	public static final double PREFERRED_HEIGHT = 90;
 	public static final double MAXIMUM_WIDTH = 1024;
 	public static final double MAXIMUM_HEIGHTS = PREFERRED_HEIGHT;
@@ -35,20 +30,19 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	public static int ledSize = 4;
 	private static int colOffSet = 0;
 	private final Pane ledPane = new Pane();
-	private Text text;
 	private Timeline timeline;
 	private Region[][] leds = new Region[8][noCols];
 	private boolean[][] value = new boolean[8][noCols];
+	private boolean needsLayout = true;
 
 
 	public LedMatrixSkin(LedMatrixControl control)
 	{
 		super(control);
-
+		
 		ledPane.setId("ledmatrixpane");
+		getChildren().setAll(ledPane);
 		init();
-		buildPane();
-		layout();
 		setTimeLine();
 		addListeners();
 	}
@@ -85,28 +79,6 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	}
 
 
-	private void buildPane()
-	{
-		ledPane.setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
-
-		text = new Text();
-		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 56.0);
-		text.getStyleClass().add("text");
-		text.setFont(font);
-		text.setTextOrigin(VPos.TOP);
-
-		for (int row = 0; row < noRows; row++)
-		{
-			for (int col = 0; col < noCols; col++)
-			{
-				leds[row][col] = createLed();
-			}
-		}
-
-		getChildren().setAll(ledPane, text);
-	}
-
-
 	protected static Region createLed()
 	{
 		Region led = new Region();
@@ -123,8 +95,8 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	private void handleNewValue(Observable observable)
 	{
 		value = (boolean[][]) ((ObjectPropertyBase<boolean[][]>) observable).get();
-		if (timeline.getStatus() == Status.STOPPED)
-			showValue(0);
+		if (!needsLayout && timeline.getStatus() != Status.RUNNING)
+			showValue(colOffSet);
 	}
 
 
@@ -146,14 +118,6 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 				layout();
 			}
 		});
-		getSkinnable().addTextListener(new InvalidationListener()
-		{
-			@Override
-			public void invalidated(Observable observable)
-			{
-				text.setText(getSkinnable().getSkinText());
-			}
-		});
 		getSkinnable().addClickedListener(new EventHandler<MouseEvent>()
 		{
 			@Override
@@ -166,7 +130,8 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 						if (timeline.getStatus() == Status.RUNNING)
 						{
 							timeline.stop();
-							showValue(0);
+							colOffSet = 0;
+							clearDisplay();
 						}
 						else
 							timeline.play();
@@ -187,13 +152,6 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 
 	private void layout()
 	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
-				: getSkinnable().getHeight();
-
-		if (size == 0)
-		{
-			return;
-		}
 		layoutLeds(getSkinnable().getWidth(), getSkinnable().getHeight());
 	}
 
@@ -201,7 +159,7 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	private void layoutLeds(double width, double heights)
 	{
 		ledPane.getChildren().clear();
-		noCols = (int) Math.round(width / 4);
+		noCols = (int) Math.round(width / 4) < 64 ? 64 : (int) Math.round(width / 4);
 		leds = new Region[noRows][noCols];
 
 		double x1 = width * 0.5 - noCols * 2;
@@ -219,6 +177,7 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 			y1 += ledSize;
 			x1 = width * 0.5 - noCols * 2;
 		}
+		needsLayout = false;
 	}
 
 
@@ -242,19 +201,37 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 
 	private void showValue(int offset)
 	{
-		int colOffset = 0;
-		for (int row = 0; row < value.length; row++)
+		int ledoffset = 0;
+		for (int row = 0; row < noRows; row++)
 		{
+			ledoffset = offset;
 			for (int col = 0; col < value[0].length; col++)
 			{
-				if (col + offset < leds[0].length)
-					leds[row][col + offset].setVisible(!value[row][col]);
-				else if (col < leds[0].length)
-				{
-					leds[row][colOffset % value[0].length].setVisible(!value[row][colOffset % value[0].length]);
-					colOffset++;
-				}
+				if (checkRange(ledoffset))
+					leds[row][ledoffset].setVisible(!value[row][col]);
+				else
+					leds[row][ledoffset % noCols].setVisible(!value[row][col]);
+
+				ledoffset++;
 			}
 		}
+	}
+
+
+	public void clearDisplay()
+	{
+		for (int row = 0; row < noRows; row++)
+		{
+			for (int col = 0; col < noCols; col++)
+			{
+				leds[row][col].setVisible(true);
+			}
+		}
+	}
+
+
+	private static boolean checkRange(int offset)
+	{
+		return offset >= 0 && offset < noCols;
 	}
 }
