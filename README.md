@@ -2,11 +2,11 @@
 
 Demo project for different ways to handle and display time:
 
-7 segments LCD style display 
+<h5>7-segments LCD style display</h5>
   
   00:00:00 (hours:minutes:seconds)
   
-Timer & stopwatch
+<h5>Timer & stopwatch</h5>
 
   00:00:00 (minutes:seconds:milliseconds)
   
@@ -14,21 +14,21 @@ Timer & stopwatch
   - Left or right click on display will set a new value.
   - Doubleclick will reset (if timer is not running).
                
-LED circle clock
+<h5>LED circle clock</h5>
   
   Outer circle showing minutes, inner one hours and seconds in center.
     
-- 8x256(1024) led style matrix.
+<h5>8x256(1024) LED style matrix</h5>
 
   - Showing the time is just an option here. Any text will do as well.
   - Maximum is 8(64) chars at a time.
   - Start/stop moving the text with doubleclick on display.
 
-Installation
+<h5>Installation</h5>
 
-Run 'Clocks.jar' from the 'dist' folder
+  Run 'Clocks.jar' from the 'dist' folder
 
-Additional Files
+<h5>Additional Files</h5>
   
   logo.png: used for the App.
   bell.mp3: will be played if the counter reached 0.
