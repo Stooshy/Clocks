@@ -3,6 +3,8 @@
 Demo project for different ways to handle and display time:
 
 <h5>7-segments LCD style display</h5>
+
+![Alt text](/../master/screenshots/lcdwatch.png?raw=true "")
   
   00:00:00 (hours:minutes:seconds)
   
