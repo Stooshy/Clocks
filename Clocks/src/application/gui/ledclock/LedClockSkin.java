@@ -31,10 +31,10 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 {
 	public static final double MINIMUM_WIDTH = 10;
 	public static final double MINIMUM_HEIGHT = 10;
-	public static final double MAXIMUM_WIDTH = 1024;
-	public static final double MAXIMUM_HEIGHTS = 1024;
-	public static final double PREFERRED_WIDTH = 250;
-	public static final double PREFERRED_HEIGHT = 250;
+	public static final double MAXIMUM_WIDTH = 865;
+	public static final double MAXIMUM_HEIGHTS = 910;
+	public static final double PREFERRED_WIDTH = 280;
+	public static final double PREFERRED_HEIGHT = 280;
 	private final Pane pane = new Pane();
 	private final List<Region> minutes = new ArrayList<Region>();
 	private final List<Region> hours = new ArrayList<Region>();
@@ -99,7 +99,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 
 			Lighting l = new Lighting();
 			Distant light = new Distant();
-			light.setAzimuth(-idx * 30);
+			light.setAzimuth(180);
 			l.setSurfaceScale(10.0f);
 			l.setLight(light);
 			line.setEffect(l);
@@ -263,9 +263,6 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		{
 			return;
 		}
-		size = size - 10; // 10 = insets
-		pane.setPrefSize(size, size);
-
 		layoutLines(size);
 		layoutLeds(minutes, 0.1, 6, size);
 		layoutLeds(hours, 0.3, 30, size);
@@ -296,7 +293,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				y1 = (size - 0.675 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
 				x1 = (size - 0.675 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
 			}
-			line.setTranslateX(size * 0.5 + x1 - (newWidth * 0.4));
+			line.setTranslateX(size * 0.5 + x1 );
 			line.setTranslateY(size * 0.5 + y1 - (newHeigths * 0.5));
 			line.setPrefSize(newWidth, newHeigths);
 			idx++;

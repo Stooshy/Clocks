@@ -95,7 +95,7 @@ public class Clocks extends Application
 		counterLine.setCycleCount(Animation.INDEFINITE);
 
 		mainContainer = new ScreensController(WATCH_SCREEN1, WATCH_SCREEN2, TimeScreen.WATCH_SCREEN3, COUNTER_SCREEN);
-		mainContainer.setScreen(TimeScreen.WATCH_SCREEN3);
+		mainContainer.setScreen(TimeScreen.WATCH_SCREEN1);
 		mainContainer.registerScreenChangedListener(new ChangeListener<TimeScreen>()
 		{
 			@Override

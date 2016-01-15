@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.paint.Color;
@@ -30,12 +29,11 @@ public class LedControl extends Control implements TimeConsumer, ScreenNode
 	public LedControl(TimeProvider provider)
 	{
 		getStyleClass().add("ledclock");
-		setPadding(new Insets(5, 5, 5, 5));
 		ledColor = new SimpleObjectProperty<Color>(Color.SILVER);
 		text = new SimpleStringProperty(this, "text", "test");
 		setTimeProvider(provider);
-		setPrefHeight(290);
-		setPrefWidth(240);
+		setPrefHeight(280);
+		setPrefWidth(235);
 	}
 
 
