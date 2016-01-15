@@ -77,7 +77,7 @@ public class LedControl extends Control implements TimeConsumer, ScreenNode
 
 	public void count(boolean up)
 	{
-		setMinutes(multiPlexerM.getNumber() + 1);
+		setMinutes(multiPlexerM.getNumber());
 	}
 
 
@@ -113,7 +113,8 @@ public class LedControl extends Control implements TimeConsumer, ScreenNode
 
 	private void setMinutes(int value)
 	{
-		multiPlexerM.set(value + 1);
+		multiPlexerM.set(value);
+		
 	}
 
 

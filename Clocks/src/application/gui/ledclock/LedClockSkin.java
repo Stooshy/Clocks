@@ -148,8 +148,8 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	{
 		@SuppressWarnings("unchecked")
 		SimpleObjectProperty<Integer> newO = (SimpleObjectProperty<Integer>) observable;
-		int newValue = newO.get();
-		for (int idx = 1; idx < newValue; idx++)
+		minutes.forEach(m -> m.setStyle(SILVER));
+		for (int idx = 1; idx < newO.get() + 1; idx++)
 		{
 			if (idx % 5 == 0)
 			{
@@ -293,7 +293,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 				y1 = (size - 0.675 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
 				x1 = (size - 0.675 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
 			}
-			line.setTranslateX(size * 0.5 + x1 );
+			line.setTranslateX(size * 0.5 + x1);
 			line.setTranslateY(size * 0.5 + y1 - (newHeigths * 0.5));
 			line.setPrefSize(newWidth, newHeigths);
 			idx++;
@@ -325,20 +325,13 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
 				: getSkinnable().getHeight();
 
-		size = size - 10; // 10 = insets
-		if (size <= 0)
-		{
-			return;
-		}
 		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 10.0 / 144 * size);
 		text.setFont(font);
-		double textWidth = text.getLayoutBounds().getWidth();
-
 		if (text.getLayoutBounds().getWidth() > 0.78 * size)
 		{
 			text.setText("...");
 		}
 		text.setTranslateY((size * 0.5 - (text.getLayoutBounds().getHeight()) * 0.5));
-		text.setTranslateX((size * 0.5 - (textWidth * 0.45)));
+		text.setTranslateX((size * 0.5 - (text.getLayoutBounds().getWidth() * 0.45)));
 	}
 }
