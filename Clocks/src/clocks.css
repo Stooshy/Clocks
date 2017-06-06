@@ -119,6 +119,18 @@
 	-fx-border-radius: 10.0;
 	-fx-border-width: 0.0;
 }
+#datepane{
+    -fx-background-color: 
+        #c3c4c4,
+        linear-gradient(rgb(240.0,240.0,240.0) 50.0%, #d7d7d7  100.0% );
+    -fx-background-radius: 20.0;
+    -fx-background-insets: 0.0,1.0,1.0;
+     -fx-border-color:  #c3c4c4,
+        linear-gradient(rgb(200.0,200.0,200.0) 50.0%, #d7d7d7  100.0% );
+     -fx-border-width: 0.0;
+     -fx-border-radius: 20.0;
+    -fx-text-fill: black;
+}
 
 #ledclockpane{
     -fx-background-color: 
@@ -126,6 +138,9 @@
         linear-gradient(rgb(240.0,240.0,240.0) 50.0%, #d7d7d7  100.0% );
     -fx-background-radius: 30.0;
     -fx-background-insets: 0.0,1.0,1.0;
+     -fx-border-color:  #c3c4c4,
+        linear-gradient(rgb(200.0,200.0,200.0) 50.0%, #d7d7d7  100.0% );
+     -fx-border-radius: 30.0;
     -fx-text-fill: black;
 }
 .ledclock{
@@ -162,7 +177,7 @@
    -fx-background-color: black;
 }
 .ledmatrixskin .on-led {
-	-led-color: rgb(255.0, 0.0, 0.0);
+	-led-color: rgb(255.0, 10.0, 10.0);
    -fx-background-color: radial-gradient(focus-angle 0.0deg, focus-distance 0.0%, 
                                           center 50.0% 50.0%, 
                                           radius 55.0%, 
@@ -189,4 +204,27 @@
 .ledmatrixskin .cover{
 	-fx-background-color: black;
 }
-
+.default-color0.chart-symbol {
+    -fx-background-radius: 30.0px;
+}
+.chart {
+    -fx-padding: 10.0px;
+}
+.chart-content {
+    -fx-padding: 30.0px;
+}
+.chart-legend {
+   -fx-background-color:  transparent;
+   -fx-padding: 20.0px;
+}
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+.default-color0.chart-series-line { -fx-stroke: #3278fa; }
+.default-color0.chart-line-symbol { -fx-background-color: #3278fa, white;  }
+.axis-minor-tick-mark {
+    -fx-stroke: #3278fa;
+}
+#progress .percentage{
+    -fx-fill: null;
+}

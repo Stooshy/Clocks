@@ -3,77 +3,112 @@ package application.gui.segment;
 import java.util.ArrayList;
 import java.util.List;
 
-import application.gui.ScreenNode;
+import application.ObserveableTimeProvider;
 import application.gui.TimeProvider;
+import application.gui.Updateable;
+import application.gui.screen.ScreenNode;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.event.EventHandler;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
-public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenNode
+public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNode, Updateable
 {
 	private final List<SevenDigitsHandler> segments = new ArrayList<SevenDigitsHandler>();
-	private final HBox sp;
-	protected TimeProvider timeProvider;
+	protected ObserveableTimeProvider provider;
+	private static double PREFERRED_WIDTH = SevenSegmentsSkin.PREFERRED_WIDTH * 8;
+	private static double PREFERRED_HEIGHT = SevenSegmentsSkin.PREFERRED_HEIGHT + 10;
+	private double MAXIMUM_WIDTH = PREFERRED_WIDTH * 4d;
+	private double MAXIMUM_HEIGH = PREFERRED_HEIGHT * 4d;
+	private static double MINIMUM_HEIGHT = PREFERRED_HEIGHT;
+	private static double MINIMUM_WIDTH = -1;
 
 
 	/**
 	 * Hours, minutes, seconds: 00:00:00
 	 */
-	public SevenSegmentsDisplay(TimeProvider timeProvider)
+	public SevenSegmentsDisplay(ObserveableTimeProvider timeProvider)
 	{
-		sp = new HBox();
-		sp.setId("clockpane");
-		sp.setAlignment(Pos.CENTER);
-		sp.setSpacing(5);
-		sp.setPadding(new Insets(5, 5, 5, 5));
-		sp.setPrefHeight(SevenSegmentsSkin.PREFERRED_HEIGHT);
-		sp.setPrefWidth(SevenSegmentsSkin.PREFERRED_WIDTH * 4);
+		setId("clockpane");
+		init();
+		setAlignment(Pos.CENTER);
+		setSpacing(5);
+		setPadding(new Insets(5, 5, 5, 5));
 		buildDisplayPane();
-		setTimeProvider(timeProvider);
-
-		sp.widthProperty().addListener(new InvalidationListener()
+		this.provider = timeProvider;
+		setHours(provider.getHours());
+		setMinutes(provider.getMinutes());
+		this.provider.addSecondsInvalidationListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layoutPane();
+				setSeconds(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
+		this.provider.addMinutesListener(new InvalidationListener()
+		{
 
-		sp.heightProperty().addListener(new InvalidationListener()
+			@Override
+			public void invalidated(Observable observable)
+			{
+				setMinutes(((SimpleIntegerProperty) observable).get());
+			}
+		});
+		this.provider.addHoursListener(new InvalidationListener()
+		{
+
+			@Override
+			public void invalidated(Observable observable)
+			{
+				setHours(((SimpleIntegerProperty) observable).get());
+			}
+		});
+		widthProperty().addListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layoutPane();
+				if (((ReadOnlyDoubleProperty) observable).get() == 0d)
+				{
+					return;
+				}
+				double hi = ((ReadOnlyDoubleProperty) observable).get();
+				double scaleX = hi / PREFERRED_WIDTH;
+				setScaleX(scaleX);
 			}
 		});
 	}
 
 
-	private void layoutPane()
+	private void init()
 	{
-		double scaleX = sp.getWidth() / 220;
-		double scaleY = sp.getHeight() / 75;
-		if (scaleX / 2 > 1 || scaleY / 2 > 1)
-			return;
-
-		for (Node pane : sp.getChildren())
+		if (Double.compare(getPrefWidth(), 0.0) <= 0 || Double.compare(getPrefHeight(), 0.0) <= 0
+				|| Double.compare(getWidth(), 0.0) <= 0 || Double.compare(getHeight(), 0.0) <= 0)
 		{
-			if (pane.getId() != null)
+			if (getPrefWidth() > 0 && getPrefHeight() > 0)
 			{
-				pane.setScaleX(scaleX / 2);
-				pane.setScaleY(scaleY / 2);
-				pane.setTranslateY(5);
+				setPrefSize(getPrefWidth(), getPrefHeight());
 			}
+			else
+			{
+				setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+			}
+		}
+
+		if (Double.compare(getMinWidth(), 0.0) <= 0 || Double.compare(getMinHeight(), 0.0) <= 0)
+		{
+			setMinSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
+		}
+
+		if (Double.compare(getMaxWidth(), 0.0) <= 0 || Double.compare(getMaxHeight(), 0.0) <= 0)
+		{
+			setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGH);
 		}
 	}
 
@@ -84,33 +119,21 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 		{
 			if (colIdx == 2 || colIdx == 5)
 			{
-				sp.getChildren().add(createMarks());
+				getChildren().add(createMarks());
 			}
 			else
 			{
 				final SevenSegmentsControl seg = new SevenSegmentsControl("segmentskin");
 				segments.add(seg);
-				seg.setOnMouseReleased(new EventHandler<MouseEvent>()
-				{
-					@Override
-					public void handle(MouseEvent event)
-					{
-						SevenSegmentsControl seg = (SevenSegmentsControl) event.getSource();
-						if (event.getButton() == MouseButton.PRIMARY)
-							seg.count(true);
-						else
-							seg.count(false);
-					}
-				});
-				sp.getChildren().add(seg);
+				getChildren().add(seg);
 			}
 		}
 	}
 
 
-	public Pane getNode()
+	public Node getNode()
 	{
-		return sp;
+		return this;
 	}
 
 
@@ -148,7 +171,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 	}
 
 
-	private void setSeconds(int value)
+	protected void setSeconds(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
@@ -158,7 +181,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 	}
 
 
-	private void setMinutes(int value)
+	protected void setMinutes(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
@@ -168,7 +191,7 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 	}
 
 
-	private void setHours(int value)
+	protected void setHours(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
@@ -178,28 +201,12 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 	}
 
 
-	public void consumeTime()
-	{
-		setSeconds(timeProvider.getSeconds());
-		setMinutes(timeProvider.getMinutes());
-		setHours(timeProvider.getHours());
-	}
-
-
-	public void setTimeProvider(TimeProvider provider)
-	{
-		this.timeProvider = provider;
-	}
-
-
 	private Region createMarks()
 	{
 		Region svg = new Region();
 		svg.setId("marks");
 		svg.getStyleClass().setAll("marks");
 		svg.setPrefSize(5, 15);
-		svg.setTranslateY(0);
-		svg.setTranslateX(0);
 		return svg;
 	}
 
@@ -209,4 +216,37 @@ public class SevenSegmentsDisplay implements TimeProvider, TimeConsumer, ScreenN
 		return segments.get(idx);
 	}
 
+
+	@Override
+	public void pauseUpdate()
+	{
+		provider.pauseUpdate();
+	}
+
+
+	@Override
+	public void startUpate()
+	{
+		provider.startUpate();
+	}
+
+
+	@Override
+	public boolean isRunning()
+	{
+		return provider.isRunning();
+	}
+	
+	@Override
+	public void toggleMode()
+	{
+		if (isRunning())
+		{
+			pauseUpdate();
+		}
+		else
+		{
+			startUpate();
+		}
+	}
 }

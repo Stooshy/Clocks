@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
@@ -19,12 +20,6 @@ import javafx.util.Duration;
 
 public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<LedMatrixControl>
 {
-	public static final double MINIMUM_WIDTH = 10;
-	public static final double MINIMUM_HEIGHT = 10;
-	public static final double PREFERRED_WIDTH = 256;
-	public static final double PREFERRED_HEIGHT = 90;
-	public static final double MAXIMUM_WIDTH = 1024;
-	public static final double MAXIMUM_HEIGHTS = PREFERRED_HEIGHT;
 	public static int noRows = 8;
 	public static int noCols = 64;
 	public static int ledSize = 4;
@@ -33,49 +28,17 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	private Timeline timeline;
 	private Region[][] leds = new Region[8][noCols];
 	private boolean[][] value = new boolean[8][noCols];
-	private boolean needsLayout = true;
 
 
 	public LedMatrixSkin(LedMatrixControl control)
 	{
 		super(control);
-		
+
 		ledPane.setId("ledmatrixpane");
+		createLeds(control.getPrefWidth());
 		getChildren().setAll(ledPane);
-		init();
 		setTimeLine();
 		addListeners();
-	}
-
-
-	private void init()
-	{
-		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
-		{
-			if (getSkinnable().getPrefWidth() > 0 && getSkinnable().getPrefHeight() > 0)
-			{
-				getSkinnable().setPrefSize(getSkinnable().getPrefWidth(), getSkinnable().getPrefHeight());
-			}
-			else
-			{
-				getSkinnable().setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
-			}
-		}
-
-		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
-		{
-			getSkinnable().setMinSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
-		}
-
-		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
-		{
-			getSkinnable().setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGHTS);
-		}
 	}
 
 
@@ -95,27 +58,19 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	private void handleNewValue(Observable observable)
 	{
 		value = (boolean[][]) ((ObjectPropertyBase<boolean[][]>) observable).get();
-		if (!needsLayout && timeline.getStatus() != Status.RUNNING)
+		if (timeline.getStatus() != Status.RUNNING)
 			showValue(colOffSet);
 	}
 
 
 	private void addListeners()
 	{
-		getSkinnable().heightProperty().addListener(new InvalidationListener()
-		{
-			@Override
-			public void invalidated(Observable observable)
-			{
-				layout();
-			}
-		});
 		getSkinnable().widthProperty().addListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layout();
+				createLeds(((ReadOnlyDoubleProperty) observable).doubleValue());
 			}
 		});
 		getSkinnable().addClickedListener(new EventHandler<MouseEvent>()
@@ -139,8 +94,9 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 				}
 			}
 		});
-		getSkinnable().addMinutesListener(new InvalidationListener()
+		getSkinnable().addSecondsChangedListener(new InvalidationListener()
 		{
+
 			@Override
 			public void invalidated(Observable observable)
 			{
@@ -150,34 +106,34 @@ public class LedMatrixSkin extends SkinBase<LedMatrixControl> implements Skin<Le
 	}
 
 
-	private void layout()
+	private void createLeds(double size)
 	{
-		layoutLeds(getSkinnable().getWidth(), getSkinnable().getHeight());
-	}
+		if (size == 0)
+		{
+			return;
+		}
 
-
-	private void layoutLeds(double width, double heights)
-	{
 		ledPane.getChildren().clear();
-		noCols = (int) Math.round(width / 4) < 64 ? 64 : (int) Math.round(width / 4);
+
+		noCols = (int) Math.round(size / 4) <= 64 ? 64 : (int) Math.round(size / 4);
 		leds = new Region[noRows][noCols];
 
-		double x1 = width * 0.5 - noCols * 2;
-		double y1 = heights * 0.5 - noRows * 2 + ledSize;
+		double x1 = 0;
+		double y1 = 0;
 		for (int row = 0; row < noRows; row++)
 		{
 			for (int col = 0; col < noCols; col++)
 			{
-				leds[row][col] = createLed();
+				Region led = createLed();
+				leds[row][col] = led;
 				leds[row][col].setLayoutX(x1);
-				leds[row][col].setLayoutY(heights - y1);
-				ledPane.getChildren().add(leds[row][col]);
+				leds[row][col].setLayoutY(y1);
+				ledPane.getChildren().add(led);
 				x1 += ledSize;
 			}
 			y1 += ledSize;
-			x1 = width * 0.5 - noCols * 2;
+			x1 = 0;
 		}
-		needsLayout = false;
 	}
 
 

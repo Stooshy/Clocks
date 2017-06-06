@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
@@ -22,12 +23,12 @@ import javafx.scene.layout.Pane;
 //@formatter:on
 public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements Skin<SevenSegmentsControl>
 {
-	public static final double MINIMUM_WIDTH = 10;
-	public static final double MINIMUM_HEIGHT = 10;
-	public static final double PREFERRED_WIDTH = Segment.rotSegmentWidth + Segment.segmentWidth;
-	public static final double PREFERRED_HEIGHT = Segment.segmentHeigths * 2 + Segment.rotSegmentHeights;
-	public static final double MAXIMUM_WIDTH = PREFERRED_WIDTH;
-	public static final double MAXIMUM_HEIGHT = PREFERRED_HEIGHT;
+	public static final double PREFERRED_WIDTH = Segment.defRotSegmentWidth + Segment.defSegmentWidth;
+	public static final double PREFERRED_HEIGHT = Segment.defSegmentHeigths * 2 + Segment.defRotSegmentHeights;
+	public static final double MINIMUM_WIDTH = PREFERRED_WIDTH;
+	public static final double MINIMUM_HEIGHT = PREFERRED_HEIGHT;
+	public static final double MAXIMUM_WIDTH = PREFERRED_WIDTH * 2d;
+	public static final double MAXIMUM_HEIGHT = PREFERRED_HEIGHT * 2d;
 	private final Pane pane = new Pane();
 	protected final List<Segment> digits = new ArrayList<Segment>();
 
@@ -112,17 +113,18 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 
 	private void buildPane()
 	{
-		addNewSegment(Segment.rotSegmentHeights / 2, 0, true); // a
-		addNewSegment(PREFERRED_WIDTH - Segment.segmentWidth, (Segment.rotSegmentHeights / 2), false); // b
-		addNewSegment(PREFERRED_WIDTH - Segment.segmentWidth, PREFERRED_HEIGHT / 2, false); // c
-		addNewSegment(Segment.segmentWidth / 2, PREFERRED_HEIGHT - Segment.defRotSegmentHeights, true); // d
-		addNewSegment(0, PREFERRED_HEIGHT / 2, false); // f
-		addNewSegment(0, Segment.rotSegmentHeights / 2, false); // e
-		addNewSegment(Segment.segmentWidth / 2,
-				PREFERRED_HEIGHT - Segment.defSegmentHeigths - Segment.defRotSegmentHeights, true); // g
+		addNewSegment(Segment.defRotSegmentHeights / 2, 0, true); // a
+		addNewSegment(getSkinnable().getPrefWidth() - Segment.defSegmentWidth, (Segment.defRotSegmentHeights / 2),
+				false); // b
+		addNewSegment(getSkinnable().getPrefWidth() - Segment.defSegmentWidth, getSkinnable().getPrefHeight() / 2,
+				false); // c
+		addNewSegment(Segment.defSegmentWidth / 2, getSkinnable().getPrefHeight() - Segment.defRotSegmentHeights, true); // d
+		addNewSegment(0, getSkinnable().getPrefHeight() / 2, false); // f
+		addNewSegment(0, Segment.defRotSegmentHeights / 2, false); // e
+		addNewSegment(Segment.defSegmentWidth / 2,
+				getSkinnable().getPrefHeight() - Segment.defSegmentHeigths - Segment.defRotSegmentHeights, true); // g
 		pane.getStyleClass().setAll("pane");
 		getChildren().setAll(pane);
-		layout();
 	}
 
 
@@ -151,44 +153,19 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 			}
 		});
 
-		getSkinnable().widthProperty().addListener(new InvalidationListener()
-		{
-			@Override
-			public void invalidated(Observable observable)
-			{
-				layout();
-			}
-		});
-
 		getSkinnable().heightProperty().addListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layout();
+				if (((ReadOnlyDoubleProperty) observable).get() <= 0d)
+				{
+					return;
+				}
+				double hi = ((ReadOnlyDoubleProperty) observable).get();
+				double scaleY = hi / PREFERRED_HEIGHT;
+				getSkinnable().setScaleY(scaleY);
 			}
 		});
 	}
-
-
-	protected void layout()
-	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
-				: getSkinnable().getHeight();
-
-		if (size == 0)
-		{
-			return;
-		}
-
-		double scaleX = getSkinnable().getWidth() / PREFERRED_WIDTH;
-		double scaleY = getSkinnable().getHeight() / PREFERRED_HEIGHT;
-		getSkinnable().setScaleY(scaleY);
-		getSkinnable().setScaleX(scaleX);
-		pane.setPrefSize(getSkinnable().getWidth(), getSkinnable().getHeight());
-		pane.setTranslateX(-size / 2);
-		pane.setTranslateY(-size);
-
-	}
-
 }

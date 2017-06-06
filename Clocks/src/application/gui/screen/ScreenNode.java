@@ -1,4 +1,4 @@
-package application.gui;
+package application.gui.screen;
 
 import javafx.scene.Node;
 

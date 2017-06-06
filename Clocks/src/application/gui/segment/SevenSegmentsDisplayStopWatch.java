@@ -1,13 +1,35 @@
 package application.gui.segment;
 
+import application.ObserveableTimeProvider;
+import application.Timer;
 import application.counter.TimeCounter;
+import application.gui.CounterMode;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
-public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements TimeConsumer
+public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements Timer
 {
 
-	public SevenSegmentsDisplayStopWatch()
+	public SevenSegmentsDisplayStopWatch(ObserveableTimeProvider provider)
 	{
-		super(TimeCounter.getInstance());
+		super(provider);
+
+		provider.addMilliSecondsChangedListener(new ChangeListener<Number>()
+		{
+
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+			{
+				setMilliseconds(newValue.intValue());
+			}
+		});
+	}
+
+
+	@Override
+	public int getMilliSeconds()
+	{
+		return getSegment(4).getValueDisplayed() * 100 + getSegment(5).getValueDisplayed() * 10;
 	}
 
 
@@ -32,7 +54,8 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	}
 
 
-	private void setSeconds(int value)
+	@Override
+	protected void setSeconds(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
@@ -42,20 +65,14 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	}
 
 
-	private void setMinutes(int value)
+	@Override
+	protected void setMinutes(int value)
 	{
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
 		getSegment(0).set(SevenDigit.values()[b]);
 		getSegment(1).set(SevenDigit.values()[a]);
-	}
-
-
-	@Override
-	public int getMilliSeconds()
-	{
-		return getSegment(4).getValueDisplayed() * 100 + getSegment(5).getValueDisplayed() * 10;
 	}
 
 
@@ -70,11 +87,33 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 
 
 	@Override
-	public void consumeTime()
+	public void set(int minutes, int seconds, int milliSeconds)
 	{
-		setMilliseconds(timeProvider.getMilliSeconds());
-		setSeconds(timeProvider.getSeconds());
-		setMinutes(timeProvider.getMinutes());
+		setMinutes(minutes);
+		setSeconds(seconds);
+		setMilliseconds(milliSeconds);
+
+		((TimeCounter) provider).set(minutes, seconds, milliSeconds);
 	}
 
+
+	@Override
+	public void toggleMode()
+	{
+		if (isRunning())
+		{
+			pauseUpdate();
+		}
+		else
+		{
+			set(getMinutes(), getSeconds(), getMilliSeconds());
+			startUpate();
+		}
+	}
+
+
+	public void setMode(CounterMode newMode)
+	{
+		((TimeCounter) provider).setMode(newMode);
+	}
 }

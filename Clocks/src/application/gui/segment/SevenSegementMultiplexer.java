@@ -3,7 +3,7 @@ package application.gui.segment;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class SevenSegementMultiplexer
+class SevenSegementMultiplexer
 {
 	private SimpleObjectProperty<boolean[]> bits;
 	private static int noOfSegments = 7;

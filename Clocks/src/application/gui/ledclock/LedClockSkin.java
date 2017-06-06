@@ -3,17 +3,19 @@ package application.gui.ledclock;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
+import javafx.scene.Node;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
 import javafx.scene.effect.DropShadow;
@@ -29,12 +31,6 @@ import javafx.util.Duration;
 
 public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedControl>
 {
-	public static final double MINIMUM_WIDTH = 10;
-	public static final double MINIMUM_HEIGHT = 10;
-	public static final double MAXIMUM_WIDTH = 865;
-	public static final double MAXIMUM_HEIGHTS = 910;
-	public static final double PREFERRED_WIDTH = 280;
-	public static final double PREFERRED_HEIGHT = 280;
 	private final Pane pane = new Pane();
 	private final List<Region> minutes = new ArrayList<Region>();
 	private final List<Region> hours = new ArrayList<Region>();
@@ -48,48 +44,14 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	public LedClockSkin(LedControl control)
 	{
 		super(control);
-
 		pane.setId("ledclockpane");
-		init();
 		buildPane();
 		addListeners();
 	}
 
 
-	private void init()
-	{
-		if (Double.compare(getSkinnable().getPrefWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getPrefHeight(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getHeight(), 0.0) <= 0)
-		{
-			if (getSkinnable().getPrefWidth() > 0 && getSkinnable().getPrefHeight() > 0)
-			{
-				getSkinnable().setPrefSize(getSkinnable().getPrefWidth(), getSkinnable().getPrefHeight());
-			}
-			else
-			{
-				getSkinnable().setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
-			}
-		}
-
-		if (Double.compare(getSkinnable().getMinWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMinHeight(), 0.0) <= 0)
-		{
-			getSkinnable().setMinSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
-		}
-
-		if (Double.compare(getSkinnable().getMaxWidth(), 0.0) <= 0
-				|| Double.compare(getSkinnable().getMaxHeight(), 0.0) <= 0)
-		{
-			getSkinnable().setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGHTS);
-		}
-	}
-
-
 	private void buildPane()
 	{
-
 		// lines
 		for (int idx = 0; idx < 12; idx++)
 		{
@@ -131,69 +93,41 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 		}
 
 		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 40.0);
-		text = new Text(getSkinnable().getSkinText());
+		text = new Text("00");
 		text.setFont(font);
 		text.setTextOrigin(VPos.TOP);
 		text.getStyleClass().add("text");
 		text.setMouseTransparent(true);
-		text.setText(getSkinnable().getSkinText());
 		pane.getChildren().add(text);
 
 		getChildren().setAll(pane);
-		layout();
 	}
 
 
-	private void handleNewMinutes(Observable observable)
+	private void handleNewMinutes(int value)
 	{
-		@SuppressWarnings("unchecked")
-		SimpleObjectProperty<Integer> newO = (SimpleObjectProperty<Integer>) observable;
 		minutes.forEach(m -> m.setStyle(SILVER));
-		for (int idx = 1; idx < newO.get() + 1; idx++)
+		for (int idx = 1; idx < value + 1; idx++)
 		{
 			if (idx % 5 == 0)
 			{
-				minutes.get(idx).setStyle(GREEN);
+				minutes.get(idx).setStyle(RED);
 			}
 			else
 			{
-				minutes.get(idx).setStyle(RED);
+				minutes.get(idx).setStyle(GREEN);
 			}
 		}
 	}
 
 
-	private void handleNewSeconds(Observable observable)
+	private void handleNewHours(int value)
 	{
-		Timeline watchLine = new Timeline(new KeyFrame(Duration.seconds(0), new EventHandler<ActionEvent>()
+		String colour = RED;
+		hours.forEach(hour -> hour.setStyle(SILVER));
+		for (int idx = 0; idx < value % 12; idx++)
 		{
-			@Override
-			public void handle(ActionEvent actionEvent)
-			{
-				minutes.get(0).setStyle(GREEN);
-			}
-		}), new KeyFrame(Duration.millis(500)));
-		watchLine.setOnFinished(new EventHandler<ActionEvent>()
-		{
-
-			@Override
-			public void handle(ActionEvent event)
-			{
-				minutes.get(0).setStyle(SILVER);
-			}
-		});
-		watchLine.play();
-	}
-
-
-	private void handleNewHours(Observable observable)
-	{
-		@SuppressWarnings("unchecked")
-		SimpleObjectProperty<Integer> newO = (SimpleObjectProperty<Integer>) observable;
-		int newValue = newO.get();
-		for (int idx = 0; idx < newValue; idx++)
-		{
-			hours.get(idx + 1).setStyle(RED);
+			hours.get(idx + 1).setStyle(colour);
 		}
 	}
 
@@ -205,16 +139,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			@Override
 			public void invalidated(Observable observable)
 			{
-				handleNewMinutes(observable);
-			}
-		});
-		getSkinnable().addSecondsChangedListener(new ChangeListener<Integer>()
-		{
-
-			@Override
-			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue)
-			{
-				handleNewSeconds(observable);
+				handleNewMinutes(((SimpleIntegerProperty) observable).get());
 			}
 		});
 		getSkinnable().addHoursListener(new InvalidationListener()
@@ -222,7 +147,18 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			@Override
 			public void invalidated(Observable observable)
 			{
-				handleNewHours(observable);
+				handleNewHours(((SimpleIntegerProperty) observable).get());
+			}
+		});
+		getSkinnable().addSecondsChangedListener(new InvalidationListener()
+		{
+
+			@Override
+			public void invalidated(Observable observable)
+			{
+				String ni = minutes.get(0).getStyle().equals(SILVER) ? RED : SILVER;
+				minutes.get(0).setStyle(ni);
+				text.setText(String.format("%02d", ((SimpleIntegerProperty) observable).intValue()));
 			}
 		});
 		getSkinnable().widthProperty().addListener(new InvalidationListener()
@@ -230,43 +166,54 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layout();
+				layout(((ReadOnlyDoubleProperty) observable).get());
 			}
 		});
+
 		getSkinnable().heightProperty().addListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				layout();
-			}
-		});
-		getSkinnable().textSkinProperty().addListener(new ChangeListener<String>()
-		{
-
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-			{
-				text.setText(getSkinnable().getSkinText());
-				layoutText();
+				layout(((ReadOnlyDoubleProperty) observable).get());
 			}
 		});
 	}
 
 
-	protected void layout()
+	private void layout(Double observable)
 	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
-				: getSkinnable().getHeight();
-
-		if (size == 0)
+		double size = getSkinnable().getHeight();
+		if (size == 0d)
 		{
 			return;
 		}
+
 		layoutLines(size);
 		layoutLeds(minutes, 0.1, 6, size);
 		layoutLeds(hours, 0.3, 30, size);
-		layoutText();
+		layoutText(size);
+
+		Timeline timeline = new Timeline();
+		for (Node node : pane.getChildren())
+		{
+			timeline.getKeyFrames().addAll(new KeyFrame(Duration.ZERO,
+					new KeyValue(node.translateXProperty(), Math.random() * LedControl.PREF_SIZE, Interpolator.EASE_IN),
+					new KeyValue(node.translateYProperty(), Math.random() * LedControl.PREF_SIZE,
+							Interpolator.EASE_IN)),
+					new KeyFrame(new Duration(5000),
+							new KeyValue(node.translateXProperty(), node.getTranslateX(), Interpolator.EASE_OUT),
+							new KeyValue(node.translateYProperty(), node.getTranslateY(), Interpolator.EASE_OUT)));
+		}
+		timeline.setOnFinished(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				getSkinnable().startUpate();
+			}
+		});
+		timeline.play();
 	}
 
 
@@ -274,24 +221,25 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	{
 		double y1 = 0d;
 		double x1 = 0d;
-		double newWidth = 0;
+		double newWidth = Math.round(0.005 * size);
 		double newHeigths = 0;
-
+		double rad = 0;
 		int idx = 0;
+
 		for (Region line : lines)
 		{
-			newWidth = Math.round(0.005 * size);
-			if (idx == 0 || idx == 3 || idx == 6 || idx == 9 || idx == 12)
+			rad = Math.toRadians(30 * idx);
+			if (idx == 0 || idx == 3 || idx == 6 || idx == 9)
 			{
 				newHeigths = Math.round(0.425 * size);
-				y1 = (size - 0.715 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
-				x1 = (size - 0.715 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
+				y1 = size * 0.285 * ((Math.cos(rad)));
+				x1 = size * 0.285 * ((Math.sin(rad)));
 			}
 			else
 			{
 				newHeigths = Math.round(0.5 * size);
-				y1 = (size - 0.675 * size) * ((Math.cos(30 * idx * Math.PI / 180)));
-				x1 = (size - 0.675 * size) * ((Math.sin(30 * idx * Math.PI / 180)));
+				y1 = size * 0.325 * ((Math.cos(rad)));
+				x1 = size * 0.325 * ((Math.sin(rad)));
 			}
 			line.setTranslateX(size * 0.5 + x1);
 			line.setTranslateY(size * 0.5 + y1 - (newHeigths * 0.5));
@@ -320,18 +268,11 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 	}
 
 
-	private void layoutText()
+	private void layoutText(double size)
 	{
-		double size = getSkinnable().getWidth() < getSkinnable().getHeight() ? getSkinnable().getWidth()
-				: getSkinnable().getHeight();
-
 		Font font = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 10.0 / 144 * size);
 		text.setFont(font);
-		if (text.getLayoutBounds().getWidth() > 0.78 * size)
-		{
-			text.setText("...");
-		}
-		text.setTranslateY((size * 0.5 - (text.getLayoutBounds().getHeight()) * 0.5));
-		text.setTranslateX((size * 0.5 - (text.getLayoutBounds().getWidth() * 0.45)));
+		text.setTranslateY((size * 0.5 - (text.getLayoutBounds().getHeight() * 0.5)));
+		text.setTranslateX((size * 0.5 - (text.getLayoutBounds().getWidth() * 0.5)));
 	}
 }

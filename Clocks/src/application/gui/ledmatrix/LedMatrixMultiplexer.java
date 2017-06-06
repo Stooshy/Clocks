@@ -3,7 +3,7 @@ package application.gui.ledmatrix;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class LedMatrixMultiplexer
+class LedMatrixMultiplexer
 {
 	private SimpleObjectProperty<boolean[][]> bits;
 
@@ -25,13 +25,13 @@ public class LedMatrixMultiplexer
 			{
 				if (value % 2 != 0)
 				{
-					valueBits[col][row] = true;
+					valueBits[row][col] = true;
 				}
-				++col;
+				++row;
 				value = value >>> 1;
 			}
-			++row;
-			col = 0;
+			++col;
+			row = 0;
 		}
 		return valueBits;
 	}
@@ -41,6 +41,7 @@ public class LedMatrixMultiplexer
 	{
 		boolean[][] result = new boolean[8][values.length * 8];
 		int offset = 0;
+		int mappedRow = 7;
 		for (MatrixValues value : values)
 		{
 			boolean[][] matrixCode = convert(value.getCode());
@@ -49,9 +50,11 @@ public class LedMatrixMultiplexer
 			{
 				for (int col = 0; col < matrixCode[0].length; col++)
 				{
-					result[row][col + offset] = matrixCode[row][col];
+					result[mappedRow][col + offset] = matrixCode[row][col];
 				}
+				mappedRow--;
 			}
+			mappedRow = 7;
 			offset = offset + 8;
 		}
 		bits.set(result);

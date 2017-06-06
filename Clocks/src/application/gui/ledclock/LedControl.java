@@ -1,132 +1,50 @@
 package application.gui.ledclock;
 
-import application.gui.ScreenNode;
-import application.gui.TimeProvider;
-import application.gui.segment.TimeConsumer;
+import application.ObserveableTimeProvider;
+import application.gui.Updateable;
+import application.gui.screen.ScreenNode;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.paint.Color;
 
-public class LedControl extends Control implements TimeConsumer, ScreenNode
+public final class LedControl extends Control implements ScreenNode, Updateable
 {
-	private LedClockMultiplexer multiPlexerM = new LedClockMultiplexer();
-	private LedClockMultiplexer multiPlexerS = new LedClockMultiplexer();
-	private LedClockMultiplexer multiPlexerH = new LedClockMultiplexer();
-	private TimeProvider timeProvider;
+	public static final double MAXIMUM_WIDTH = 1024;
+	public static final double MAXIMUM_HEIGHTS = 1024;
+	public static final double PREF_SIZE = 276;
 	private ObjectProperty<Color> ledColor;
-	private int lastSec;
-	private int lastMinute;
-	private int lastHour;
-	private StringProperty text;
+	private ObserveableTimeProvider provider;
 
 
-	public LedControl(TimeProvider provider)
+	public LedControl(ObserveableTimeProvider provider)
 	{
 		getStyleClass().add("ledclock");
-		ledColor = new SimpleObjectProperty<Color>(Color.SILVER);
-		text = new SimpleStringProperty(this, "text", "test");
+		init();
 		setTimeProvider(provider);
-		setPrefHeight(280);
-		setPrefWidth(235);
+		ledColor = new SimpleObjectProperty<Color>(Color.SILVER);
 	}
 
 
-	public void addMinutesListener(InvalidationListener toAdd)
+	private void init()
 	{
-		multiPlexerM.getProperty().addListener(toAdd);
-		setMinutes(timeProvider.getMinutes());
-	}
-
-
-	public void addSecondsChangedListener(ChangeListener<Integer> toAdd)
-	{
-		multiPlexerS.getProperty().addListener(toAdd);
-	}
-
-
-	public void addHoursListener(InvalidationListener toAdd)
-	{
-		multiPlexerH.getProperty().addListener(toAdd);
-		setHours(timeProvider.getHours());
-	}
-
-
-	public String getSkinText()
-	{
-		return text.get();
-	}
-
-
-	public void setSkinText(String value)
-	{
-		text.set(value);
-	}
-
-
-	public final StringProperty textSkinProperty()
-	{
-		return text;
-	}
-
-
-	public void count(boolean up)
-	{
-		setMinutes(multiPlexerM.getNumber());
-	}
-
-
-	public void consumeTime()
-	{
-		int actSec = timeProvider.getSeconds();
-		int actMinutes = timeProvider.getMinutes();
-		int actHour = timeProvider.getHours();
-		if (lastSec != actSec)
+		if (Double.compare(getPrefWidth(), 0.0) <= 0 || Double.compare(getPrefHeight(), 0.0) <= 0
+				|| Double.compare(getWidth(), 0.0) <= 0 || Double.compare(getHeight(), 0.0) <= 0)
 		{
-			setSeconds(actSec);
-			lastSec = actSec;
+			setPrefSize(PREF_SIZE, PREF_SIZE);
 		}
-		if (lastMinute != actMinutes)
+
+		if (Double.compare(getMinWidth(), 0.0) <= 0 || Double.compare(getMinHeight(), 0.0) <= 0)
 		{
-			setMinutes(actMinutes);
-			lastMinute = actMinutes;
+			setMinSize(PREF_SIZE, PREF_SIZE);
 		}
-		if (lastHour != actHour)
+
+		if (Double.compare(getMaxWidth(), 0.0) <= 0 || Double.compare(getMaxHeight(), 0.0) <= 0)
 		{
-			setHours(actHour);
-			lastHour = actHour;
+			setMaxSize(MAXIMUM_WIDTH, MAXIMUM_HEIGHTS);
 		}
-	}
-
-
-	private void setSeconds(int value)
-	{
-		setSkinText("" + value);
-		multiPlexerS.set(value);
-	}
-
-
-	private void setMinutes(int value)
-	{
-		multiPlexerM.set(value);
-		
-	}
-
-
-	private void setHours(int value)
-	{
-		multiPlexerH.set(value % 12);
-	}
-
-
-	public void setTimeProvider(TimeProvider provider)
-	{
-		this.timeProvider = provider;
 	}
 
 
@@ -154,4 +72,60 @@ public class LedControl extends Control implements TimeConsumer, ScreenNode
 		return this;
 	}
 
+
+	@Override
+	public void pauseUpdate()
+	{
+		provider.pauseUpdate();
+	}
+
+	@Override
+	public void startUpate()
+	{
+		provider.startUpate();
+	}
+
+
+	@Override
+	public boolean isRunning()
+	{
+		return provider.isRunning();
+	}
+
+
+	final void addMinutesListener(InvalidationListener toAdd)
+	{
+		provider.addMinutesListener(toAdd);
+	}
+
+
+	final void addSecondsChangedListener(InvalidationListener toAdd)
+	{
+		provider.addSecondsInvalidationListener(toAdd);
+	}
+
+
+	final void addHoursListener(InvalidationListener toAdd)
+	{
+		provider.addHoursListener(toAdd);
+	}
+
+
+	public void setTimeProvider(ObserveableTimeProvider provider)
+	{
+		this.provider = provider;
+	}
+	
+	@Override
+	public void toggleMode()
+	{
+		if (isRunning())
+		{
+			pauseUpdate();
+		}
+		else
+		{
+			startUpate();
+		}
+	}
 }

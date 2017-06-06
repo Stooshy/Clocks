@@ -1,7 +1,10 @@
-package application.gui;
+package application;
 
-public interface TimeProvider
+public interface Timer
 {
+	public void set(int minutes, int seconds, int milliSeconds);
+
+
 	/**
 	 * 
 	 * @return value between 0 - 99 representing seconds
@@ -20,14 +23,7 @@ public interface TimeProvider
 
 	/**
 	 * 
-	 * @return value between 0 - 99 representing hours
-	 */
-	int getHours();
-
-
-	/**
-	 * 
-	 * @return value between 0 - 1000 representing millisconds
+	 * @return value between 0 - 999 representing millisconds
 	 */
 	int getMilliSeconds();
 }

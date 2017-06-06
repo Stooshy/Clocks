@@ -1,45 +1,40 @@
 package application;
 
-import application.gui.ScreenNode;
+import application.counter.TimeCounter;
 import application.gui.TimeProvider;
 import application.gui.ledclock.LedControl;
 import application.gui.ledmatrix.LedMatrixControl;
+import application.gui.screen.ScreenNode;
 import application.gui.segment.SevenSegmentsDisplay;
 import application.gui.segment.SevenSegmentsDisplayStopWatch;
-import application.gui.segment.TimeConsumer;
 import javafx.scene.Node;
+import javafx.util.Duration;
 
-public enum TimeScreen implements TimeProvider,TimeConsumer
+public enum TimeScreen implements TimeProvider
 {
 	//@formatter:off
-	COUNTER_SCREEN(new SevenSegmentsDisplayStopWatch()),
-	WATCH_SCREEN1(new SevenSegmentsDisplay(LocalTimeProvider.getInstance())),
-	WATCH_SCREEN2(new LedControl(LocalTimeProvider.getInstance())),
-	WATCH_SCREEN3(new LedMatrixControl(LocalTimeProvider.getInstance()));
+	COUNTER_SCREEN(new SevenSegmentsDisplayStopWatch(new TimeCounter(Duration.millis(100)))),
+	SEVENSEG(new SevenSegmentsDisplay(new ObserveableTimeProvider(Duration.millis(951)))),
+	LED(new LedControl(new ObserveableTimeProvider(Duration.millis(951)))),
+	MATRIX(new LedMatrixControl(new ObserveableTimeProvider(Duration.millis(951))));
 	//@formatter:on
 
-	protected final ScreenNode consumer;
-
-
-	public void consumeTime()
-	{
-		((TimeConsumer) this.consumer).consumeTime();
-	}
+	public final ScreenNode screen;
 
 
 	public Node getNode()
 	{
-		return this.consumer.getNode();
+		return this.screen.getNode();
 	}
 
 
-	private TimeScreen(ScreenNode consumer)
+	private TimeScreen(ScreenNode screen)
 	{
-		this.consumer = consumer;
+		this.screen = screen;
 	}
 
 
-	public TimeScreen nextScreen()
+	public TimeScreen next()
 	{
 		return values()[(ordinal() + 1) % values().length];
 	}
@@ -48,35 +43,27 @@ public enum TimeScreen implements TimeProvider,TimeConsumer
 	@Override
 	public int getSeconds()
 	{
-		return ((TimeProvider) this.consumer).getSeconds();
+		return ((TimeProvider) this.screen).getSeconds();
 	}
 
 
 	@Override
 	public int getMinutes()
 	{
-		return ((TimeProvider) this.consumer).getMinutes();
+		return ((TimeProvider) this.screen).getMinutes();
 	}
 
 
 	@Override
 	public int getHours()
 	{
-		return ((TimeProvider) this.consumer).getHours();
+		return ((TimeProvider) this.screen).getHours();
 	}
 
 
 	@Override
 	public int getMilliSeconds()
 	{
-		return ((TimeProvider) this.consumer).getMilliSeconds();
+		return ((TimeProvider) this.screen).getMilliSeconds();
 	}
-
-
-	@Override
-	public void setTimeProvider(TimeProvider provider)
-	{
-		((TimeConsumer) this.consumer).setTimeProvider(provider);
-	}
-
 }

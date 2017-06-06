@@ -1,30 +1,39 @@
 package application.counter;
 
-import application.LocalTimeProvider;
+import application.ObserveableTimeProvider;
 import application.gui.CounterMode;
-import application.gui.TimeProvider;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.util.Duration;
 
-public class TimeCounter implements TimeProvider
+public class TimeCounter extends ObserveableTimeProvider
 {
-	private static int actMilliSeconds;
-	private static int actSeconds;
-	private static int actMinutes;
-	private static CounterMode mode;
-
-	private static TimeCounter _instance;
+	private int actMilliSeconds;
+	private int actSeconds;
+	private int actMinutes;
+	private CounterMode mode;
 
 
-	public static TimeCounter getInstance()
+	public TimeCounter(Duration update)
 	{
-		if (_instance == null)
-			_instance = new TimeCounter();
-		return _instance;
-	}
+		super(update);
+		addMilliSecondsChangedListener(new ChangeListener<Number>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+			{
+				actMilliSeconds = 99 - newValue.intValue() / 10;
+			}
+		});
 
-
-	private TimeCounter()
-	{
-		reset();
+		addSecondsChangedListener(new ChangeListener<Number>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+			{
+				count();
+			}
+		});
 	}
 
 
@@ -56,75 +65,69 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	/**
-	 * Decrements or increments the counter by 1 second if the last call to
-	 * count() was > 999ms ago.
-	 * 
-	 * @return false if the counter would reached max/min value.
-	 */
-	public static boolean count()
+	public void count()
 	{
 		if (mode == CounterMode.UP)
-			return increment();
+			increment();
 		else
-			return decrement();
+			decrement();
 	}
 
 
-	private static boolean decrement()
+	private void decrement()
 	{
-		if (actSeconds == 0 && actMinutes == 0)
+		if (actSeconds == 0)
 		{
-			actMilliSeconds = 0;
-			return false;
-		}
-
-		if (actMilliSeconds < (999 - LocalTimeProvider.getInstance().getMilliSeconds()))
-		{
-			if (actSeconds == 0)
+			if (actMinutes == 0)
 			{
-				if (actMinutes > 0)
-				{
-					actMinutes--;
-					actSeconds = 59;
-				}
+				actMilliSeconds = 0;
+				milliSeconds.set(0);
+				minutes.set(0);
+				seconds.set(0);
+				pauseUpdate();
+				return;
 			}
 			else
-				actSeconds--;
-		}
-		actMilliSeconds = 999 - LocalTimeProvider.getInstance().getMilliSeconds();
-		return true;
-	}
-
-
-	private static boolean increment()
-	{
-		if (actMinutes == 99 && actSeconds == 59)
-			return false;
-
-		if (actMilliSeconds > LocalTimeProvider.getInstance().getMilliSeconds())
-		{
-			actSeconds++;
-			if (actSeconds == 60)
 			{
-				if (actMinutes < 99)
-				{
-					actSeconds = 0;
-					actMinutes++;
-				}
-				else
-				{
-					actMilliSeconds = 0;
-					actMinutes = 59;
-				}
+				actMinutes--;
+				minutes.set(actMinutes);
+				actSeconds = 60;
 			}
 		}
-		actMilliSeconds = LocalTimeProvider.getInstance().getMilliSeconds();
-		return true;
+		actSeconds--;
+		// actMilliSeconds = 99 - getMilliSeconds() / 10;
 	}
 
 
-	public static void set(int minutes, int seconds, int milliSeconds)
+	private void increment()
+	{
+		if (actMinutes == 99 && actSeconds == 59)
+			pauseUpdate();
+
+		if (actMilliSeconds < getMilliSeconds())
+			return;
+
+		actSeconds++;
+		if (actSeconds == 60)
+		{
+			if (actMinutes < 99)
+			{
+				actSeconds = 0;
+				actMinutes++;
+			}
+			else
+			{
+				actMilliSeconds = 0;
+				actMinutes = 59;
+			}
+		}
+		actMilliSeconds = getMilliSeconds();
+		seconds.set(actSeconds);
+		minutes.set(actMinutes);
+	}
+
+
+	public void set(int minutes, int seconds, int milliSeconds)
 	{
 		actSeconds = seconds;
 		actMinutes = minutes;
@@ -132,17 +135,8 @@ public class TimeCounter implements TimeProvider
 	}
 
 
-	public static void reset()
-	{
-		actSeconds = 0;
-		actMinutes = 0;
-		actMilliSeconds = 0;
-	}
-
-
-	public static void setMode(CounterMode newMode)
+	public void setMode(CounterMode newMode)
 	{
 		mode = newMode;
 	}
-
 }
