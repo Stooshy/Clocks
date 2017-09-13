@@ -17,8 +17,7 @@ import com.oopitis.weather.WeatherReport;
 import com.oopitis.weather.owm.OwmSummary;
 import com.oopitis.weather.owm.OwmWeather;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import application.gui.webcam.WebImage;
 
 class WeatherInfo
 {
@@ -170,12 +169,10 @@ class WeatherInfo
 		}
 
 
-		private Optional<ImageView> getImage(WeatherReport report)
+		private Optional<WebImage> getImage(WeatherReport report)
 		{
 			Optional<OwmSummary> os = Optional.ofNullable((OwmSummary) report.get(OwmWeather.WeatherSummary));
-			Optional<ImageView> iv = os.map(item -> new ImageView(new Image(item.items().get(0).getIconUrl())));
-			iv.ifPresent(item -> item.setPreserveRatio(true));
-			iv.ifPresent(item -> item.setSmooth(true));
+			Optional<WebImage> iv = os.map(item -> new WebImage(item.items().get(0).getIconUrl()));
 			return iv;
 		}
 

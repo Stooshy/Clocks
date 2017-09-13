@@ -1,23 +1,28 @@
 package application;
 
-import application.gui.TimeEngine;
+import application.gui.BaseTimeLine;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.util.Duration;
 
-public class ObserveableTimeProvider extends LocalTimeProvider
+public class ObserveableTimeProvider // extends LocalTimeProvider
 {
 	protected final SimpleIntegerProperty seconds = new SimpleIntegerProperty();
 	protected final SimpleIntegerProperty minutes = new SimpleIntegerProperty();
 	protected final SimpleIntegerProperty hours = new SimpleIntegerProperty();
 	protected final SimpleIntegerProperty milliSeconds = new SimpleIntegerProperty();
-	private TimeEngine timer;
+	protected BaseTimeLine timer;
+
+
+	public ObserveableTimeProvider()
+	{
+	}
 
 
 	public ObserveableTimeProvider(Duration update)
 	{
-		timer = new TimeEngine(update)
+		timer = new BaseTimeLine(update)
 		{
 			@Override
 			public void consume()
@@ -25,6 +30,15 @@ public class ObserveableTimeProvider extends LocalTimeProvider
 				set();
 			}
 		};
+	}
+
+
+	private void set()
+	{
+		milliSeconds.set(LocalTimeProvider.getInstance().getMilliSeconds());
+		seconds.set(LocalTimeProvider.getInstance().getSeconds());
+		minutes.set(LocalTimeProvider.getInstance().getMinutes());
+		hours.set(LocalTimeProvider.getInstance().getHours());
 	}
 
 
@@ -58,15 +72,6 @@ public class ObserveableTimeProvider extends LocalTimeProvider
 	}
 
 
-	private void set()
-	{
-		milliSeconds.set(getMilliSeconds());
-		seconds.set(getSeconds());
-		minutes.set(getMinutes());
-		hours.set(getHours());
-	}
-
-
 	public void startUpate()
 	{
 		timer.startUpate();
@@ -82,6 +87,14 @@ public class ObserveableTimeProvider extends LocalTimeProvider
 	public boolean isRunning()
 	{
 		return timer.isRunning();
+	}
+
+
+	public void reset()
+	{
+		hours.set(00);
+		seconds.set(00);
+		minutes.set(00);
 	}
 
 }

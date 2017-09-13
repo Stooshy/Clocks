@@ -2,15 +2,13 @@ package application.gui.ledclock;
 
 import application.ObserveableTimeProvider;
 import application.gui.Updateable;
-import application.gui.screen.ScreenNode;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.paint.Color;
 
-public final class LedControl extends Control implements ScreenNode, Updateable
+public final class LedControl extends Control implements Updateable
 {
 	public static final double MAXIMUM_WIDTH = 1024;
 	public static final double MAXIMUM_HEIGHTS = 1024;
@@ -66,27 +64,18 @@ public final class LedControl extends Control implements ScreenNode, Updateable
 	}
 
 
-	@Override
-	public Node getNode()
-	{
-		return this;
-	}
-
-
-	@Override
 	public void pauseUpdate()
 	{
 		provider.pauseUpdate();
 	}
 
-	@Override
+
 	public void startUpate()
 	{
 		provider.startUpate();
 	}
 
 
-	@Override
 	public boolean isRunning()
 	{
 		return provider.isRunning();
@@ -115,17 +104,5 @@ public final class LedControl extends Control implements ScreenNode, Updateable
 	{
 		this.provider = provider;
 	}
-	
-	@Override
-	public void toggleMode()
-	{
-		if (isRunning())
-		{
-			pauseUpdate();
-		}
-		else
-		{
-			startUpate();
-		}
-	}
+
 }

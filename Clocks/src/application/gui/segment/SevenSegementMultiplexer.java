@@ -5,13 +5,13 @@ import javafx.beans.property.SimpleObjectProperty;
 
 class SevenSegementMultiplexer
 {
-	private SimpleObjectProperty<boolean[]> bits;
+	private SimpleObjectProperty<boolean[]> segments;
 	private static int noOfSegments = 7;
 
 
 	public SevenSegementMultiplexer()
 	{
-		bits = new SimpleObjectProperty<boolean[]>(new boolean[noOfSegments]);
+		segments = new SimpleObjectProperty<boolean[]>(new boolean[noOfSegments]);
 	}
 
 
@@ -34,16 +34,16 @@ class SevenSegementMultiplexer
 
 	public void set(SevenDigit value)
 	{
-		bits.set(convert(value.getCode()));
+		segments.set(convert(value.getCode()));
 	}
 
 
 	private int getCode()
 	{
 		int value = 0;
-		for (int i = 0; i < bits.get().length; ++i)
+		for (int i = 0; i < segments.get().length; ++i)
 		{
-			value += bits.get()[i] ? (1 << i) : 0;
+			value += segments.get()[i] ? (1 << i) : 0;
 		}
 		return (value == 0) ? 0 : SevenDigit.findDigit(value).getCode();
 	}
@@ -51,7 +51,7 @@ class SevenSegementMultiplexer
 
 	public void addListener(InvalidationListener toAdd)
 	{
-		bits.addListener(toAdd);
+		segments.addListener(toAdd);
 	}
 
 

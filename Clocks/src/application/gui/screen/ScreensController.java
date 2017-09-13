@@ -1,7 +1,8 @@
 package application.gui.screen;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import application.TimeScreen;
 import application.gui.Updateable;
@@ -12,6 +13,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -20,8 +22,7 @@ import javafx.util.Duration;
 
 public class ScreensController
 {
-
-	private SortedMap<TimeScreen, Node> screens = new TreeMap<TimeScreen, Node>();
+	private List<TimeScreen> screens = new ArrayList<TimeScreen>();
 	private ObjectProperty<TimeScreen> actScreen;
 	private final StackPane sp;
 
@@ -31,82 +32,92 @@ public class ScreensController
 		sp = new StackPane();
 		for (TimeScreen screen : screens)
 			addScreen(screen);
-	}
 
-
-	public Node getScreenNode(TimeScreen screen)
-	{
-		for (TimeScreen key : screens.keySet())
+		actScreen = new SimpleObjectProperty<TimeScreen>();
+		actScreen.addListener(new ChangeListener<TimeScreen>()
 		{
-			if (key.equals(screen))
-				return key.getNode();
-		}
-		throw new IllegalArgumentException("screen not found");
+			@Override
+			public void changed(ObservableValue<? extends TimeScreen> observable, TimeScreen oldValue,
+					TimeScreen newValue)
+			{
+				if (oldValue != null)
+					if (oldValue != TimeScreen.COUNTER_SCREEN)
+						((Updateable) oldValue.screen).pauseUpdate();
+			}
+		});
 	}
 
 
 	public void addScreen(TimeScreen screenId)
 	{
-		screens.put(screenId, screenId.getNode());
-		actScreen = new SimpleObjectProperty<TimeScreen>();
+		screens.add(screenId);
 	}
 
 
 	public void setNextScreen()
 	{
-		((Updateable) getScreen().screen).pauseUpdate();
-		setScreen(actScreen.get().next());
-		if (getScreen() == TimeScreen.COUNTER_SCREEN)
-		{
+		if (screens.size() == 1)
 			return;
+
+		int idx = screens.indexOf(actScreen.get());
+		if (idx > -1)
+		{
+			idx = (idx + 1) % screens.size();
+			setScreen(screens.get(idx));
 		}
-		((Updateable) getScreen().screen).startUpate();
 	}
 
 
 	public boolean setScreen(final TimeScreen key)
 	{
-		if (screens.get(key) != null)
-		{ // screen loaded
+		if (screens.contains(key))
+		{
 			final DoubleProperty opacity = sp.opacityProperty();
 
-			if (!sp.getChildren().isEmpty())
-			{
-				Timeline fade = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
-						new KeyFrame(new Duration(500),
+			Timeline fade = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
+					new KeyFrame(new Duration(500),
 
-								new EventHandler<ActionEvent>()
+							new EventHandler<ActionEvent>()
+							{
+								public void handle(ActionEvent event)
 								{
-									public void handle(ActionEvent event)
-									{
-										sp.getChildren().clear();
-										sp.getChildren().add(screens.get(key));
-										Timeline fadeIn = new Timeline(
-												new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-												new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
-										fadeIn.play();
+									sp.getChildren().clear();
+									sp.getChildren().add(getSreen(key));
+									Timeline fadeIn = new Timeline(
+											new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
+											new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
+									fadeIn.play();
 
-									}
-								}, new KeyValue(opacity, 0.0)));
-				fade.play();
-			}
-			else
+								}
+							}, new KeyValue(opacity, 0.0)));
+			fade.setOnFinished(new EventHandler<ActionEvent>()
 			{
-				// no one else been displayed, then just show
-				sp.getChildren().add(screens.get(key));
-			}
+				@Override
+				public void handle(ActionEvent event)
+				{
+					if (actScreen.get() != TimeScreen.COUNTER_SCREEN)
+						((Updateable) actScreen.get().screen).startUpate();
+				}
+			});
+			fade.play();
 			actScreen.set(key);
 			return true;
 		}
 		else
 		{
-			System.out.println("screen hasn't been loaded!\n");
+			System.out.println("Screen not found: " + key.ordinal());
 			return false;
 		}
 	}
 
 
-	public TimeScreen getScreen()
+	public boolean isActualScreen(TimeScreen toCompare)
+	{
+		return getActualScreen() == toCompare;
+	}
+
+
+	protected TimeScreen getActualScreen()
 	{
 		return actScreen.get();
 	}
@@ -120,37 +131,47 @@ public class ScreensController
 
 	public double getPrefHeight()
 	{
-		return screens.get(getScreen()).prefHeight(0);
+		return getActualScreen().getNode().prefHeight(0);
 	}
 
 
 	public double getPrefWidth()
 	{
-		return screens.get(getScreen()).prefWidth(0);
-	}
-
-
-	public Node getActualScreen()
-	{
-		return sp;
+		return getActualScreen().getNode().prefWidth(0);
 	}
 
 
 	public double getMaxHeight()
 	{
-		return screens.get(getScreen()).maxHeight(0);
+		return getActualScreen().getNode().maxHeight(0);
 	}
 
 
 	public double getMaxWidth()
 	{
-		return screens.get(getScreen()).maxWidth(0);
+		return getActualScreen().getNode().maxWidth(0);
+	}
+
+
+	public Node getPane()
+	{
+		return sp;
 	}
 
 
 	public Node[] getScreens()
 	{
-		return screens.values().toArray(new Node[screens.values().size()]);
+		return screens.stream().map(TimeScreen::getNode).collect(Collectors.toList()).toArray(new Node[screens.size()]);
 	}
 
+
+	private Node getSreen(Object key)
+	{
+		return screens.get((screens.indexOf(key))).getNode();
+	}
+	
+	public void setFirstScreen()
+	{
+		setScreen(screens.get(0));
+	}
 }

@@ -1,56 +1,43 @@
 package application.gui.segment;
 
-import application.ObserveableTimeProvider;
-import application.Timer;
+import application.counter.Counter;
+import application.counter.CounterMode;
 import application.counter.TimeCounter;
-import application.gui.CounterMode;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import application.gui.Updateable;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleIntegerProperty;
 
-public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements Timer
+public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements Counter, Updateable
 {
 
-	public SevenSegmentsDisplayStopWatch(ObserveableTimeProvider provider)
+	public SevenSegmentsDisplayStopWatch(TimeCounter timeProvider)
 	{
-		super(provider);
-
-		provider.addMilliSecondsChangedListener(new ChangeListener<Number>()
+		super(timeProvider);
+		((TimeCounter) provider).addMilliSecondsInvalidationListener(new InvalidationListener()
 		{
-
 			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+			public void invalidated(Observable observable)
 			{
-				setMilliseconds(newValue.intValue());
+				setMilliseconds(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
-	}
-
-
-	@Override
-	public int getMilliSeconds()
-	{
-		return getSegment(4).getValueDisplayed() * 100 + getSegment(5).getValueDisplayed() * 10;
-	}
-
-
-	@Override
-	public int getSeconds()
-	{
-		return getSegment(2).getValueDisplayed() * 10 + getSegment(3).getValueDisplayed();
-	}
-
-
-	@Override
-	public int getMinutes()
-	{
-		return getSegment(0).getValueDisplayed() * 10 + getSegment(1).getValueDisplayed();
-	}
-
-
-	@Override
-	public int getHours()
-	{
-		return 0;
+		((TimeCounter) provider).addSecondsInvalidationListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				setSeconds(((SimpleIntegerProperty) observable).intValue());
+			}
+		});
+		((TimeCounter) provider).addMinutesListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				setMinutes(((SimpleIntegerProperty) observable).intValue());
+			}
+		});
 	}
 
 
@@ -60,8 +47,8 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		getSegment(2).set(SevenDigit.values()[b]);
-		getSegment(3).set(SevenDigit.values()[a]);
+		setSegmenet(2, b);
+		setSegmenet(3, a);
 	}
 
 
@@ -71,18 +58,25 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		getSegment(0).set(SevenDigit.values()[b]);
-		getSegment(1).set(SevenDigit.values()[a]);
+		setSegmenet(0, b);
+		setSegmenet(1, a);
 	}
 
 
 	private void setMilliseconds(int value)
 	{
-		int b = (value / 10) % 10;
-		int c = (value / 100) % 10;
+		int b = (value / 1) % 10;
+		int c = (value / 10) % 10;
 
-		getSegment(5).set(SevenDigit.values()[b]);
-		getSegment(4).set(SevenDigit.values()[c]);
+		setSegmenet(5, b);
+		setSegmenet(4, c);
+	}
+
+
+	@Override
+	protected void setHours(int value)
+	{
+		//
 	}
 
 
@@ -98,22 +92,34 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 
 
 	@Override
-	public void toggleMode()
+	public void setCountMode(CounterMode newMode)
 	{
-		if (isRunning())
-		{
-			pauseUpdate();
-		}
-		else
-		{
-			set(getMinutes(), getSeconds(), getMilliSeconds());
-			startUpate();
-		}
+		((TimeCounter) provider).setCountMode(newMode);
 	}
 
 
-	public void setMode(CounterMode newMode)
+	public int getMilliSeconds()
 	{
-		((TimeCounter) provider).setMode(newMode);
+		return getSegment(4).getDisplayedValue() * 100 + getSegment(5).getDisplayedValue() * 10;
+	}
+
+
+	public int getSeconds()
+	{
+		return getSegment(2).getDisplayedValue() * 10 + getSegment(3).getDisplayedValue();
+	}
+
+
+	public int getMinutes()
+	{
+		return getSegment(0).getDisplayedValue() * 10 + getSegment(1).getDisplayedValue();
+	}
+
+
+	@Override
+	public void startUpate()
+	{
+		((TimeCounter) provider).set(getMinutes(), getSeconds(), getMilliSeconds());
+		super.startUpate();
 	}
 }

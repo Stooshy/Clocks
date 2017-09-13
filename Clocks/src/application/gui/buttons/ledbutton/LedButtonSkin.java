@@ -1,7 +1,7 @@
 //Origin http://harmoniccode.blogspot.de/2013_05_01_archive.html
-package application.gui.ledbutton;
+package application.gui.buttons.ledbutton;
 
-import application.gui.ledbutton.LedButton;
+import application.gui.buttons.ledbutton.LedButton;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;

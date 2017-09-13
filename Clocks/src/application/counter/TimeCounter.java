@@ -1,17 +1,34 @@
 package application.counter;
 
 import application.ObserveableTimeProvider;
-import application.gui.CounterMode;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.util.Duration;
 
 public class TimeCounter extends ObserveableTimeProvider
 {
+	interface CountType
+	{
+		public int getValue(Number newValue, int actValue);
+	}
+	
+	private final SimpleIntegerProperty seconds = new SimpleIntegerProperty();
+	private final SimpleIntegerProperty minutes = new SimpleIntegerProperty();
+	private final SimpleIntegerProperty milliSeconds = new SimpleIntegerProperty();
+
 	private int actMilliSeconds;
 	private int actSeconds;
 	private int actMinutes;
 	private CounterMode mode;
+	private CountType decrement = (l, w) -> {
+		return Math.abs(w - l.intValue() / 10);
+	};
+	private CountType increment = (l, w) -> {
+		return Math.abs(w + l.intValue() / 10);
+	};
+	private CountType countType = increment;
 
 
 	public TimeCounter(Duration update)
@@ -22,10 +39,9 @@ public class TimeCounter extends ObserveableTimeProvider
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
 			{
-				actMilliSeconds = 99 - newValue.intValue() / 10;
+				milliSeconds.set(countType.getValue(newValue, actMilliSeconds));
 			}
 		});
-
 		addSecondsChangedListener(new ChangeListener<Number>()
 		{
 			@Override
@@ -37,37 +53,9 @@ public class TimeCounter extends ObserveableTimeProvider
 	}
 
 
-	@Override
-	public int getHours()
-	{
-		return 0;
-	}
-
-
-	@Override
-	public int getMinutes()
-	{
-		return actMinutes;
-	}
-
-
-	@Override
-	public int getSeconds()
-	{
-		return actSeconds;
-	}
-
-
-	@Override
-	public int getMilliSeconds()
-	{
-		return actMilliSeconds;
-	}
-
-
 	public void count()
 	{
-		if (mode == CounterMode.UP)
+		if (mode == CounterMode.INCREMENT)
 			increment();
 		else
 			decrement();
@@ -80,32 +68,27 @@ public class TimeCounter extends ObserveableTimeProvider
 		{
 			if (actMinutes == 0)
 			{
-				actMilliSeconds = 0;
-				milliSeconds.set(0);
-				minutes.set(0);
-				seconds.set(0);
 				pauseUpdate();
 				return;
 			}
 			else
 			{
 				actMinutes--;
-				minutes.set(actMinutes);
 				actSeconds = 60;
+				minutes.set(actMinutes);
+				seconds.set(actSeconds);
 			}
+			minutes.set(actMinutes);
 		}
 		actSeconds--;
-		// actMilliSeconds = 99 - getMilliSeconds() / 10;
+		seconds.set(actSeconds);
 	}
 
 
 	private void increment()
 	{
-		if (actMinutes == 99 && actSeconds == 59)
+		if (actMinutes >= 99 && actSeconds == 59)
 			pauseUpdate();
-
-		if (actMilliSeconds < getMilliSeconds())
-			return;
 
 		actSeconds++;
 		if (actSeconds == 60)
@@ -120,10 +103,9 @@ public class TimeCounter extends ObserveableTimeProvider
 				actMilliSeconds = 0;
 				actMinutes = 59;
 			}
+			minutes.set(actMinutes);
 		}
-		actMilliSeconds = getMilliSeconds();
 		seconds.set(actSeconds);
-		minutes.set(actMinutes);
 	}
 
 
@@ -132,11 +114,47 @@ public class TimeCounter extends ObserveableTimeProvider
 		actSeconds = seconds;
 		actMinutes = minutes;
 		actMilliSeconds = milliSeconds;
+
+		this.milliSeconds.set(milliSeconds);
+		this.seconds.set(seconds);
+		this.minutes.set(minutes);
 	}
 
 
-	public void setMode(CounterMode newMode)
+	public void setCountMode(CounterMode newMode)
 	{
 		mode = newMode;
+		if (mode == CounterMode.DECREMENT)
+			countType = decrement;
+		else
+			countType = increment;
+	}
+
+
+	public void addMinutesListener(InvalidationListener toAdd)
+	{
+		minutes.addListener(toAdd);
+	}
+
+
+	public void addSecondsInvalidationListener(InvalidationListener toAdd)
+	{
+		seconds.addListener(toAdd);
+	}
+
+
+	public void addMilliSecondsInvalidationListener(InvalidationListener toAdd)
+	{
+		milliSeconds.addListener(toAdd);
+	}
+	
+	public int getMinutes()
+	{
+		return actMinutes;
+	}
+	
+	public int getSeconds()
+	{
+		return actSeconds;
 	}
 }

@@ -64,7 +64,7 @@
 }
 
 .tbutton {
-    -fx-skin  : "application.gui.ledbutton.LedButtonSkin";
+    -fx-skin  : "application.gui.buttons.ledbutton.LedButtonSkin";
 }
 
 

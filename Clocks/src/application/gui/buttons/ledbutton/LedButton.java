@@ -1,4 +1,4 @@
-package application.gui.ledbutton;
+package application.gui.buttons.ledbutton;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -66,7 +66,7 @@ public class LedButton extends Control
 	@Override
 	public String getUserAgentStylesheet()
 	{
-		return getClass().getResource("/clocks.css").toExternalForm();
+		return getClass().getResource("/main/clocks.css").toExternalForm();
 	}
 
 

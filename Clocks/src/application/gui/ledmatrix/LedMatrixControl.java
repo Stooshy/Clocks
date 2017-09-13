@@ -2,18 +2,18 @@ package application.gui.ledmatrix;
 
 import application.ObserveableTimeProvider;
 import application.gui.Updateable;
-import application.gui.screen.ScreenNode;
 import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.input.MouseEvent;
 
-public class LedMatrixControl extends Control implements ScreenNode, Updateable
+public class LedMatrixControl extends Control implements Updateable
 {
 	public static final double PREFERRED_WIDTH = 266;
 	public static final double PREFERRED_HEIGHT = 33;
@@ -24,6 +24,9 @@ public class LedMatrixControl extends Control implements ScreenNode, Updateable
 	private LedMatrixMultiplexer multiPlexerM = new LedMatrixMultiplexer();
 	private ObserveableTimeProvider provider;
 	private StringProperty text;
+	int sec;
+	int min;
+	int h;
 
 
 	public LedMatrixControl(ObserveableTimeProvider provider)
@@ -37,7 +40,27 @@ public class LedMatrixControl extends Control implements ScreenNode, Updateable
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
 			{
+				SimpleIntegerProperty object = (SimpleIntegerProperty) observable;
+				sec = object.get();
 				consumeTime();
+			}
+		});
+		provider.addMinutesListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				SimpleIntegerProperty object = (SimpleIntegerProperty) observable;
+				min = object.get();
+			}
+		});
+		provider.addHoursListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				SimpleIntegerProperty object = (SimpleIntegerProperty) observable;
+				h = object.get();
 			}
 		});
 	}
@@ -70,18 +93,8 @@ public class LedMatrixControl extends Control implements ScreenNode, Updateable
 	}
 
 
-	@Override
-	public Node getNode()
-	{
-		return this;
-	}
-
-
 	private void consumeTime()
 	{
-		int sec = provider.getSeconds();
-		int min = provider.getMinutes();
-		int h = provider.getHours();
 		multiPlexerM.set(MatrixValues.findDigit((h / 10) % 10), MatrixValues.findDigit(h % 10), MatrixValues.DOULEPOINT,
 				MatrixValues.findDigit((min / 10) % 10), MatrixValues.findDigit(min % 10), MatrixValues.DOULEPOINT,
 				MatrixValues.findDigit((sec / 10) % 10), MatrixValues.findDigit(sec % 10));
@@ -137,17 +150,5 @@ public class LedMatrixControl extends Control implements ScreenNode, Updateable
 	{
 		return provider.isRunning();
 	}
-	
-	@Override
-	public void toggleMode()
-	{
-		if (isRunning())
-		{
-			pauseUpdate();
-		}
-		else
-		{
-			startUpate();
-		}
-	}
+
 }

@@ -9,11 +9,11 @@ import com.oopitis.weather.owm.OwmWeather;
 
 import application.gui.info.WeatherInfo.WeatherInfoStringBuilder;
 import application.gui.util.ShowProgressThread;
+import application.gui.webcam.WebImage;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -27,12 +27,14 @@ public class WeatherPane extends DatePane
 {
 	private final ProgressIndicator pi = new ProgressIndicator(0);
 	private WeatherChart wChart;
+	private WebImage image;
 	private float[] coordinates = new float[2];
 
 
-	public WeatherPane(Duration duration, float latitude, float longitude)
+	public WeatherPane(Duration duration, float latitude, float longitude, String imageUrl)
 	{
 		super(duration);
+		image = new WebImage(imageUrl);
 		coordinates[0] = latitude;
 		coordinates[1] = longitude;
 		pi.setId("progress");
@@ -62,6 +64,9 @@ public class WeatherPane extends DatePane
 		weather.setAlignment(Pos.CENTER);
 		addRow(idx++, weather);
 
+		addRow(idx++, image);
+		GridPane.setFillWidth(image, true);
+
 		VBox chart = new VBox();
 		wChart = new WeatherChart();
 		chart.getChildren().add(wChart);
@@ -89,6 +94,10 @@ public class WeatherPane extends DatePane
 		rc = new RowConstraints();
 		rc.setVgrow(Priority.NEVER);
 		getRowConstraints().add(rc);
+
+		rc = new RowConstraints();
+		rc.setVgrow(Priority.NEVER);
+		getRowConstraints().add(rc);
 	}
 
 
@@ -106,9 +115,9 @@ public class WeatherPane extends DatePane
 		}
 
 		if (infos.containsKey(WeatherProperties.ActPic))
-			pictures.getChildren().add((ImageView) infos.get(WeatherProperties.ActPic));
+			pictures.getChildren().add((WebImage) infos.get(WeatherProperties.ActPic));
 		if (infos.containsKey(WeatherProperties.ForePic))
-			pictures.getChildren().add((ImageView) infos.get(WeatherProperties.ForePic));
+			pictures.getChildren().add((WebImage) infos.get(WeatherProperties.ForePic));
 
 		for (Entry<WeatherProperty<?>, Object> entry : infos.entrySet())
 		{
@@ -165,6 +174,7 @@ public class WeatherPane extends DatePane
 		super.update(update);
 		startUpate(update);
 		addWeather(getWeather());
+		image.update();
 	}
 
 }

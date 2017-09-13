@@ -33,9 +33,9 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 	protected final List<Segment> digits = new ArrayList<Segment>();
 
 
-	public SevenSegmentsSkin(final SevenSegmentsControl CONTROL)
+	public SevenSegmentsSkin(final SevenSegmentsControl control)
 	{
-		super(CONTROL);
+		super(control);
 		pane.setId("segment");
 		init();
 		buildPane();
@@ -133,7 +133,7 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 		@SuppressWarnings("unchecked")
 		SimpleObjectProperty<boolean[]> newO = (SimpleObjectProperty<boolean[]>) observable;
 		boolean[] set = newO.get();
-
+		
 		for (int idx = 0; idx < digits.size(); idx++)
 		{
 			digits.get(idx).setVisible(set[idx]);

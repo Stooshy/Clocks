@@ -10,7 +10,4 @@ public interface Updateable
 
 	public boolean isRunning();
 
-
-	public void toggleMode();
-
 }

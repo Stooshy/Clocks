@@ -139,7 +139,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			@Override
 			public void invalidated(Observable observable)
 			{
-				handleNewMinutes(((SimpleIntegerProperty) observable).get());
+				handleNewMinutes(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
 		getSkinnable().addHoursListener(new InvalidationListener()
@@ -147,7 +147,7 @@ public class LedClockSkin extends SkinBase<LedControl> implements Skin<LedContro
 			@Override
 			public void invalidated(Observable observable)
 			{
-				handleNewHours(((SimpleIntegerProperty) observable).get());
+				handleNewHours(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
 		getSkinnable().addSecondsChangedListener(new InvalidationListener()

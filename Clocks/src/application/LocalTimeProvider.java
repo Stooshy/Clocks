@@ -7,10 +7,16 @@ import application.gui.TimeProvider;
 
 public class LocalTimeProvider implements TimeProvider
 {
-	protected LocalTimeProvider _instance;
+	private static LocalTimeProvider _instance;
 
 
-	public TimeProvider getInstance()
+	private LocalTimeProvider()
+	{
+
+	}
+
+
+	public static TimeProvider getInstance()
 	{
 		if (_instance == null)
 			_instance = new LocalTimeProvider();

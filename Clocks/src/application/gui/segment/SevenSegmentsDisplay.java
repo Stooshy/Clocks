@@ -4,20 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import application.ObserveableTimeProvider;
-import application.gui.TimeProvider;
 import application.gui.Updateable;
-import application.gui.screen.ScreenNode;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 
-public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNode, Updateable
+public class SevenSegmentsDisplay extends HBox implements Updateable
 {
 	private final List<SevenDigitsHandler> segments = new ArrayList<SevenDigitsHandler>();
 	protected ObserveableTimeProvider provider;
@@ -34,16 +31,19 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 	 */
 	public SevenSegmentsDisplay(ObserveableTimeProvider timeProvider)
 	{
-		setId("clockpane");
-		init();
-		setAlignment(Pos.CENTER);
-		setSpacing(5);
-		setPadding(new Insets(5, 5, 5, 5));
-		buildDisplayPane();
-		this.provider = timeProvider;
-		setHours(provider.getHours());
-		setMinutes(provider.getMinutes());
-		this.provider.addSecondsInvalidationListener(new InvalidationListener()
+		this();
+		provider = timeProvider;
+
+		provider.addMinutesListener(new InvalidationListener()
+		{
+
+			@Override
+			public void invalidated(Observable observable)
+			{
+				setMinutes(((SimpleIntegerProperty) observable).intValue());
+			}
+		});
+		provider.addSecondsInvalidationListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
@@ -51,22 +51,13 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 				setSeconds(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
-		this.provider.addMinutesListener(new InvalidationListener()
+		provider.addHoursListener(new InvalidationListener()
 		{
 
 			@Override
 			public void invalidated(Observable observable)
 			{
-				setMinutes(((SimpleIntegerProperty) observable).get());
-			}
-		});
-		this.provider.addHoursListener(new InvalidationListener()
-		{
-
-			@Override
-			public void invalidated(Observable observable)
-			{
-				setHours(((SimpleIntegerProperty) observable).get());
+				setHours(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
 		widthProperty().addListener(new InvalidationListener()
@@ -83,6 +74,17 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 				setScaleX(scaleX);
 			}
 		});
+	}
+
+
+	SevenSegmentsDisplay()
+	{
+		setId("clockpane");
+		init();
+		setAlignment(Pos.CENTER);
+		setSpacing(5);
+		setPadding(new Insets(5, 5, 5, 5));
+		buildDisplayPane();
 	}
 
 
@@ -131,43 +133,9 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 	}
 
 
-	public Node getNode()
-	{
-		return this;
-	}
-
-
-	public void setTime(SevenDigit... values)
-	{
-		int idx = 0;
-		for (SevenDigit value : values)
-		{
-			segments.get(idx++).set(value);
-		}
-	}
-
-
 	public int getMilliSeconds()
 	{
 		return 0;
-	}
-
-
-	public int getSeconds()
-	{
-		return getSegment(4).getValueDisplayed() * 10 + getSegment(5).getValueDisplayed();
-	}
-
-
-	public int getMinutes()
-	{
-		return getSegment(2).getValueDisplayed() * 10 + getSegment(3).getValueDisplayed();
-	}
-
-
-	public int getHours()
-	{
-		return getSegment(0).getValueDisplayed() * 10 + getSegment(1).getValueDisplayed();
 	}
 
 
@@ -176,8 +144,8 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		getSegment(4).set(SevenDigit.values()[b]);
-		getSegment(5).set(SevenDigit.values()[a]);
+		setSegmenet(4, b);
+		setSegmenet(5, a);
 	}
 
 
@@ -186,8 +154,8 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		getSegment(2).set(SevenDigit.values()[b]);
-		getSegment(3).set(SevenDigit.values()[a]);
+		setSegmenet(2, b);
+		setSegmenet(3, a);
 	}
 
 
@@ -196,8 +164,8 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 		int a = value % 10;
 		int b = (value / 10) % 10;
 
-		getSegment(0).set(SevenDigit.values()[b]);
-		getSegment(1).set(SevenDigit.values()[a]);
+		setSegmenet(0, b);
+		setSegmenet(1, a);
 	}
 
 
@@ -208,6 +176,12 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 		svg.getStyleClass().setAll("marks");
 		svg.setPrefSize(5, 15);
 		return svg;
+	}
+
+
+	protected void setSegmenet(int idx, int value)
+	{
+		getSegment(idx).set(SevenDigit.values()[value]);
 	}
 
 
@@ -235,18 +209,5 @@ public class SevenSegmentsDisplay extends HBox implements TimeProvider, ScreenNo
 	public boolean isRunning()
 	{
 		return provider.isRunning();
-	}
-	
-	@Override
-	public void toggleMode()
-	{
-		if (isRunning())
-		{
-			pauseUpdate();
-		}
-		else
-		{
-			startUpate();
-		}
 	}
 }

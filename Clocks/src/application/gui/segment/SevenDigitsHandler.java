@@ -10,15 +10,15 @@ public interface SevenDigitsHandler
 	public void set(SevenDigit value);
 
 
-	/**
-	 * @param up
-	 *            true: 0-9, false 9-0
-	 */
-	public void count(boolean up);
+//	/**
+//	 * @param up
+//	 *            true: 0-9, false 9-0
+//	 */
+//	public void count(boolean up);
 
 
 	/**
 	 * @return Displayed value
 	 */
-	public int getValueDisplayed();
+	public int getDisplayedValue();
 }

@@ -8,12 +8,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
 
-public abstract class TimeEngine
+public abstract class BaseTimeLine
 {
 	private Timeline infoLine;
 
 
-	public TimeEngine(Duration update)
+	public BaseTimeLine(Duration update)
 	{
 		infoLine = new Timeline(new KeyFrame(Duration.ZERO, new EventHandler<ActionEvent>()
 		{

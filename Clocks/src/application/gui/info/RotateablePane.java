@@ -11,7 +11,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -42,12 +41,6 @@ public class RotateablePane extends StackPane
 		}), new KeyFrame(Duration.seconds(7)));
 		infoLine.setCycleCount(Animation.INDEFINITE);
 		infoLine.play();
-	}
-
-
-	private RotateablePane(Node... children)
-	{
-		super(children);
 	}
 
 
@@ -146,5 +139,21 @@ public class RotateablePane extends StackPane
 		child2.visibleProperty().bind(flippedProperty);
 
 		getChildren().setAll(child1, child2);
+	}
+
+
+	public void addPane(Pane toAdd)
+	{
+		if (getChildren().size() == 2)
+			return;
+		
+		toAdd.setEffect(transform);
+		if (getChildren().size() == 0)
+			toAdd.visibleProperty().bind(flippedProperty.not());
+		else
+			toAdd.visibleProperty().bind(flippedProperty);
+
+		getChildren().add(toAdd);
+
 	}
 }

@@ -3,7 +3,6 @@ package application.gui.segment;
 import javafx.beans.InvalidationListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.Control;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -25,11 +24,7 @@ final class SevenSegmentsControl extends Control implements SevenDigitsHandler
 			@Override
 			public void handle(MouseEvent event)
 			{
-				SevenSegmentsControl seg = (SevenSegmentsControl) event.getSource();
-				if (event.getButton() == MouseButton.PRIMARY)
-					seg.count(true);
-				else
-					seg.count(false);
+				set(multiPlexer.getNextNumber());
 			}
 		});
 	}
@@ -39,6 +34,7 @@ final class SevenSegmentsControl extends Control implements SevenDigitsHandler
 	{
 		multiPlexer.addListener(toAdd);
 		set(SevenDigit.ZERO);
+
 	}
 
 
@@ -48,13 +44,7 @@ final class SevenSegmentsControl extends Control implements SevenDigitsHandler
 	}
 
 
-	public void count(boolean up)
-	{
-		set(multiPlexer.getNextNumber());
-	}
-
-
-	public int getValueDisplayed()
+	public int getDisplayedValue()
 	{
 		return multiPlexer.getSevenDigit().ordinal();
 	}
