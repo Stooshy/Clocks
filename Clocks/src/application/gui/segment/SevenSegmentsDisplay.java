@@ -74,6 +74,20 @@ public class SevenSegmentsDisplay extends HBox implements Updateable
 				setScaleX(scaleX);
 			}
 		});
+		heightProperty().addListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				if (((ReadOnlyDoubleProperty) observable).get() <= 0d)
+				{
+					return;
+				}
+				double hi = ((ReadOnlyDoubleProperty) observable).get();
+				double scaleY = hi / PREFERRED_HEIGHT;
+				setScaleY(scaleY);
+			}
+		});
 	}
 
 
@@ -135,7 +149,7 @@ public class SevenSegmentsDisplay extends HBox implements Updateable
 
 	public int getMilliSeconds()
 	{
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 
@@ -188,6 +202,12 @@ public class SevenSegmentsDisplay extends HBox implements Updateable
 	protected SevenDigitsHandler getSegment(int idx)
 	{
 		return segments.get(idx);
+	}
+
+
+	protected void setSegmentsEditable()
+	{
+		segments.forEach(seg -> seg.setEditable());
 	}
 
 

@@ -21,4 +21,9 @@ public interface SevenDigitsHandler
 	 * @return Displayed value
 	 */
 	public int getDisplayedValue();
+	
+	/**
+	 * Listen for mouseclicks.
+	 */
+	public void setEditable();
 }

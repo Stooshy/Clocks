@@ -1,11 +1,8 @@
 package main;
 
-import static application.TimeScreen.COUNTER_SCREEN;
-
 import java.util.List;
 
 import application.TimeScreen;
-import application.counter.Counter;
 import application.geodata.DataFile;
 import application.geodata.ImageGeoLocation;
 import application.gui.buttons.Buttons;
@@ -21,7 +18,6 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -73,7 +69,6 @@ public class Clocks extends Application
 			mainContainer.registerScreenChangedListener(new TimeScreenPref(stage));
 		default:
 			break;
-
 		}
 
 		addMouseListeners(stage, mainContainer);
@@ -132,23 +127,6 @@ public class Clocks extends Application
 					// record a delta distance for the drag and drop operation.
 					dragDelta.x = stage.getX() - mouseEvent.getScreenX();
 					dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-				}
-			});
-			nodeToAdd.setOnMouseClicked(new EventHandler<MouseEvent>()
-			{
-				@Override
-				public void handle(MouseEvent mouseEvent)
-				{
-					if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
-					{
-						if (mouseEvent.getClickCount() == 2)
-						{
-							if (controller.isActualScreen(COUNTER_SCREEN))
-							{
-								((Counter) TimeScreen.COUNTER_SCREEN.screen).set(0, 0, 0);
-							}
-						}
-					}
 				}
 			});
 		}

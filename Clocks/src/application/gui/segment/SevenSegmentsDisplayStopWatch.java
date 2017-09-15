@@ -7,14 +7,22 @@ import application.gui.Updateable;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implements Counter, Updateable
 {
+	protected TimeCounter provider;
 
-	public SevenSegmentsDisplayStopWatch(TimeCounter timeProvider)
+
+	public SevenSegmentsDisplayStopWatch(TimeCounter counter)
 	{
-		super(timeProvider);
-		((TimeCounter) provider).addMilliSecondsInvalidationListener(new InvalidationListener()
+		super(counter);
+		setSegmentsEditable();
+		
+		this.provider = counter;
+		provider.addMilliSecondsInvalidationListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
@@ -22,7 +30,7 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 				setMilliseconds(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
-		((TimeCounter) provider).addSecondsInvalidationListener(new InvalidationListener()
+		provider.addSecondsInvalidationListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
@@ -30,7 +38,7 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 				setSeconds(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
-		((TimeCounter) provider).addMinutesListener(new InvalidationListener()
+		provider.addMinutesListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
@@ -38,6 +46,20 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 				setMinutes(((SimpleIntegerProperty) observable).intValue());
 			}
 		});
+		setOnMouseClicked(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent mouseEvent)
+			{
+				if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
+				{
+					if (mouseEvent.getClickCount() == 2)
+					{
+						set(0, 0, 0);
+					}
+				}
+			}
+		});		
 	}
 
 
@@ -76,7 +98,7 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	@Override
 	protected void setHours(int value)
 	{
-		//
+		throw new UnsupportedOperationException();
 	}
 
 
@@ -87,14 +109,14 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 		setSeconds(seconds);
 		setMilliseconds(milliSeconds);
 
-		((TimeCounter) provider).set(minutes, seconds, milliSeconds);
+		provider.set(minutes, seconds, milliSeconds);
 	}
 
 
 	@Override
 	public void setCountMode(CounterMode newMode)
 	{
-		((TimeCounter) provider).setCountMode(newMode);
+		provider.setCountMode(newMode);
 	}
 
 
@@ -119,7 +141,7 @@ public class SevenSegmentsDisplayStopWatch extends SevenSegmentsDisplay implemen
 	@Override
 	public void startUpate()
 	{
-		((TimeCounter) provider).set(getMinutes(), getSeconds(), getMilliSeconds());
+		provider.set(getMinutes(), getSeconds(), getMilliSeconds());
 		super.startUpate();
 	}
 }

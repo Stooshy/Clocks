@@ -19,6 +19,11 @@ final class SevenSegmentsControl extends Control implements SevenDigitsHandler
 	public SevenSegmentsControl(String css)
 	{
 		getStyleClass().add(css);
+	}
+
+
+	public void setEditable()
+	{
 		setOnMouseReleased(new EventHandler<MouseEvent>()
 		{
 			@Override

@@ -5,7 +5,6 @@ import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
@@ -27,10 +26,10 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 	public static final double PREFERRED_HEIGHT = Segment.defSegmentHeigths * 2 + Segment.defRotSegmentHeights;
 	public static final double MINIMUM_WIDTH = PREFERRED_WIDTH;
 	public static final double MINIMUM_HEIGHT = PREFERRED_HEIGHT;
-	public static final double MAXIMUM_WIDTH = PREFERRED_WIDTH * 2d;
-	public static final double MAXIMUM_HEIGHT = PREFERRED_HEIGHT * 2d;
+	public static final double MAXIMUM_WIDTH = PREFERRED_WIDTH;
+	public static final double MAXIMUM_HEIGHT = PREFERRED_HEIGHT;
 	private final Pane pane = new Pane();
-	protected final List<Segment> digits = new ArrayList<Segment>();
+	private final List<Segment> digits = new ArrayList<Segment>();
 
 
 	public SevenSegmentsSkin(final SevenSegmentsControl control)
@@ -153,19 +152,5 @@ public class SevenSegmentsSkin extends SkinBase<SevenSegmentsControl> implements
 			}
 		});
 
-		getSkinnable().heightProperty().addListener(new InvalidationListener()
-		{
-			@Override
-			public void invalidated(Observable observable)
-			{
-				if (((ReadOnlyDoubleProperty) observable).get() <= 0d)
-				{
-					return;
-				}
-				double hi = ((ReadOnlyDoubleProperty) observable).get();
-				double scaleY = hi / PREFERRED_HEIGHT;
-				getSkinnable().setScaleY(scaleY);
-			}
-		});
 	}
 }
